@@ -3,6 +3,7 @@ import {
   ref,
   push,
   onValue,
+  remove,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { checkAuthStatus, logout } from "../js/session.js";
 import { database } from "../js/firebase-config.js";
@@ -56,6 +57,7 @@ onValue(categoriesRef, (snapshot) => {
   categoryGrid.innerHTML = ""; // Clear the grid before updating
 
   snapshot.forEach((childSnapshot) => {
+    const categoryId = childSnapshot.key; // Get the unique ID of the category
     const category = childSnapshot.val();
 
     // Create a card for each category
@@ -77,11 +79,57 @@ onValue(categoriesRef, (snapshot) => {
     subtitle.classList.add("card-subtitle");
     subtitle.textContent = category.subtitle;
 
+    // Buttons container
+    const buttonContainer = document.createElement("div");
+    buttonContainer.classList.add("button-container");
+
+    // View button
+    const viewButton = document.createElement("button");
+    viewButton.textContent = "View";
+    viewButton.classList.add("view-btn");
+    viewButton.addEventListener("click", () => {
+      // Show languages and information for the selected category
+      alert(
+        `Viewing category: ${category.title}\nLanguages: ${JSON.stringify(
+          category.items,
+          null,
+          2
+        )}`
+      );
+    });
+
+    // Delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.classList.add("delete-btn");
+    deleteButton.addEventListener("click", () => {
+      // Confirm deletion
+      const confirmDelete = confirm(
+        `Are you sure you want to delete the category "${category.title}"?`
+      );
+      if (confirmDelete) {
+        // Remove the category from Firebase
+        const categoryRef = ref(database, `categories/${categoryId}`);
+        remove(categoryRef)
+          .then(() => {
+            alert(`Category "${category.title}" deleted successfully.`);
+          })
+          .catch((error) => {
+            console.error("Error deleting category:", error);
+          });
+      }
+    });
+
+    // Append buttons to button container
+    buttonContainer.appendChild(viewButton);
+    buttonContainer.appendChild(deleteButton);
+
     // Append elements to the card
     cardContent.appendChild(title);
     cardContent.appendChild(subtitle);
     card.appendChild(img);
     card.appendChild(cardContent);
+    card.appendChild(buttonContainer);
 
     // Add the card to the grid
     categoryGrid.appendChild(card);

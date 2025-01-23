@@ -88,3 +88,36 @@ button:hover {
     font-size: 14px;
     color: #666;
 }
+
+/* Buttons container */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+button.view-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.view-btn:hover {
+    background-color: #0056b3;
+}
+
+button.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.delete-btn:hover {
+    background-color: #a71d2a;
+}
