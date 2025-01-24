@@ -15,7 +15,7 @@ loginForm.addEventListener('submit', async (e) => {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = '../html/add-category.html'; // Redirect on successful login
+    window.location.href = '../html/dashboard.html'; // Redirect on successful login
   } catch (error) {
     alert("Login failed: " + error.message); // Error message if login fails
   }

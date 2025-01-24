@@ -45,15 +45,12 @@
     box-shadow: 0px 0px 5px rgba(72, 196, 72, 0.5);
   }
   
-  
-
-
-/* General styles */
+ /* General styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #f9f9f9;
 }
 
 .container {
@@ -69,6 +66,104 @@ h1,
 h2 {
     text-align: center;
     color: #333;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 250px;
+    background-color: #0288d1; /* Cyan color */
+    color: #fff;
+    position: fixed;
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.sidebar-header {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background-color: #0288d1; /* Darker cyan */
+    color: #fff;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-menu li {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu li a {
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.sidebar-menu li a:hover {
+    background-color: #0288d1;
+    color: #e0f7fa; /* Lighter cyan */
+    padding-left: 25px;
+    transition: all 0.3s;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    display: flex;
+}
+
+.main-content {
+    margin-left: 250px; /* Same as the sidebar width */
+    padding: 20px;
+    flex-grow: 1;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+}
+
+/* Admin Header */
+.admin-header {
+    background-color: #0288d1; /* Blue color */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header .header-title h1 {
+    font-size: 1.8rem;
+    margin: 0;
+}
+
+.admin-header .logout-btn {
+    background-color: #e74c3c;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.admin-header .logout-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Preview Section */
+.dashboard-preview {
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Form Styles */
@@ -88,17 +183,18 @@ input[type="url"] {
 }
 
 button {
-    background-color: #4CAF50;
+    background-color: #0288d1;
     color: white;
     padding: 12px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #026aa7;
 }
 
 /* Grid Styles */

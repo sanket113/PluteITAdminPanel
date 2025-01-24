@@ -7,36 +7,49 @@
     <link rel="stylesheet" href="../css/style.css" />
   </head>
   <body>
-    <div class="container">
-      <header>
-        <h1>Add New Category</h1>
-        <button id="logout-button" class="logout-btn">Logout</button>
-      </header>
-      <form id="add-category-form">
-        <input
-          type="text"
-          id="category-title"
-          placeholder="Category Title"
-          required
-        />
-        <input
-          type="text"
-          id="category-subtitle"
-          placeholder="Category Subtitle"
-          required
-        />
-        <input
-          type="url"
-          id="category-image"
-          placeholder="Image URL"
-          required
-        />
-        <button type="submit">Add Category</button>
-      </form>
-      <h2>Existing Categories</h2>
-      <div id="category-grid" class="grid-container"></div>
+    <div class="dashboard-container">
+      <!-- Sidebar Placeholder -->
+      <div id="sidebar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <header class="admin-header">
+          <div class="header-title">
+            <h1>Add New Category</h1>
+          </div>
+          <div class="header-profile">
+            <button id="logout-button" class="logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <form id="add-category-form">
+          <input
+            type="text"
+            id="category-title"
+            placeholder="Category Title"
+            required
+          />
+          <input
+            type="text"
+            id="category-subtitle"
+            placeholder="Category Subtitle"
+            required
+          />
+          <input
+            type="url"
+            id="category-image"
+            placeholder="Image URL"
+            required
+          />
+          <button type="submit">Add Category</button>
+        </form>
+
+        <h2>Existing Categories</h2>
+        <div id="category-grid" class="grid-container"></div>
+      </div>
     </div>
 
+    <script type="module" src="../js/common.js"></script>
     <script type="module" src="../js/add-category.js"></script>
   </body>
 </html>

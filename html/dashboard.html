@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar Placeholder -->
+      <div id="sidebar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <header class="admin-header">
+          <div class="header-title">
+            <h1>Admin Dashboard</h1>
+          </div>
+          <div class="header-profile">
+            <span id="admin-name"></span>
+            <button id="logout-button" class="logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <section class="dashboard-preview">
+          <h2>Category Overview</h2>
+          <div id="category-grid" class="grid-container"></div>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="../js/common.js"></script>
+    <script type="module" src="../js/dashboard.js"></script>
+  </body>
+</html>
