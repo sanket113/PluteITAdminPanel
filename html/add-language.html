@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Language</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar Placeholder -->
+      <div id="sidebar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <header class="admin-header">
+          <div class="header-title">
+            <h1>Add New Language</h1>
+          </div>
+          <div class="header-profile">
+            <button id="logout-button" class="logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <section class="dashboard-preview">
+          <h2>Existing Languages</h2>
+          <div id="existing-languages" class="grid-container">
+            <!-- Dynamically populated existing languages will appear here -->
+          </div>
+        </section>
+
+        <section class="add-language-form">
+          <h2>Add a New Language</h2>
+          <form id="add-language-form">
+            <!-- Language Name -->
+            <input
+              type="text"
+              id="language-name"
+              placeholder="Language Name"
+              required
+            />
+
+            <!-- Language Uses -->
+            <textarea
+              id="language-uses"
+              placeholder="Uses (e.g., Web Development, AI)"
+              required
+            ></textarea>
+
+            <!-- Language Info -->
+            <textarea
+              id="language-info"
+              placeholder="Detailed Information (HTML allowed)"
+              required
+            ></textarea>
+
+            <!-- Language Logo URL -->
+            <label for="language-logo">Paste Language Logo URL:</label>
+            <input
+              type="url"
+              id="language-logo"
+              placeholder="https://example.com/logo.png"
+              required
+            />
+
+            <!-- Roadmap URLs -->
+            <label for="language-roadmaps">Paste Roadmap URLs (comma separated):</label>
+            <input
+              type="text"
+              id="language-roadmaps"
+              placeholder="https://example.com/roadmap1.pdf, https://example.com/roadmap2.pdf"
+              required
+            />
+
+            <!-- Submit Button -->
+            <button type="submit">Add Language</button>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="../js/sidebar.js"></script>
+    <script type="module" src="../js/add-language.js"></script>
+  </body>
+</html>
