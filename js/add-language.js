@@ -85,10 +85,13 @@ async function addLanguage(event) {
 
   try {
     // Create new language object
+    const itemsRef = child(ref(database), `categories/${languageCategoryUid}/items`);
+    const newLanguageRef = push(itemsRef); // Create a unique ID for the new language
     const newLanguage = {
       name,
       uses,
       info,
+      uid: ""+newLanguageRef.key,
       logo: logoUrl,
       roadmaps: roadmapLinks,
       basicRoadmap: roadmapLinks[0] || "",
@@ -97,8 +100,6 @@ async function addLanguage(event) {
     };
 
     // Push the new language under the correct category using the languageCategoryUid
-    const itemsRef = child(ref(database), `categories/${languageCategoryUid}/items`);
-    const newLanguageRef = push(itemsRef); // Create a unique ID for the new language
     await set(newLanguageRef, newLanguage);
 
     alert("Language added successfully!");
