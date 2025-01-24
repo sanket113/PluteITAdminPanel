@@ -9,12 +9,12 @@
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
   }
-  
+
   #login-form {
     display: flex;
     flex-direction: column;
   }
-  
+
   input[type="email"],
   input[type="password"] {
     padding: 10px;
@@ -23,7 +23,7 @@
     border-radius: 5px;
     font-size: 16px;
   }
-  
+
   button {
     background-color: #4CAF50;
     color: white;
@@ -34,17 +34,17 @@
     font-size: 16px;
     margin-top: 20px;
   }
-  
+
   button:hover {
     background-color: #45a049;
   }
-  
+
   input:focus,
   button:focus {
     outline: none;
     box-shadow: 0px 0px 5px rgba(72, 196, 72, 0.5);
   }
-  
+
  /* General styles */
 body {
     font-family: Arial, sans-serif;
@@ -276,18 +276,18 @@ button.delete-btn:hover {
     border-radius: 8px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   }
-  
+
   .add-language-form h2 {
     margin-bottom: 20px;
     color: #333;
   }
-  
+
   .add-language-form form {
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .add-language-form input,
   .add-language-form textarea {
     padding: 10px;
@@ -295,7 +295,7 @@ button.delete-btn:hover {
     border: 1px solid #ccc;
     border-radius: 5px;
   }
-  
+
   .add-language-form button {
     background-color: #0288d1;
     color: white;
@@ -304,8 +304,33 @@ button.delete-btn:hover {
     border-radius: 5px;
     cursor: pointer;
   }
-  
+
   .add-language-form button:hover {
     background-color: #026aa7;
   }
-  
+
+
+  .modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+}
+
+.close-btn {
+  float: right;
+  font-size: 20px;
+  cursor: pointer;
+}
