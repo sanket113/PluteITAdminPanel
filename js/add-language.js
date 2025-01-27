@@ -246,3 +246,4 @@ categorySelect.addEventListener("change", fetchExistingLanguages);
 
 // Add event listener for form submission
 addLanguageForm.addEventListener("submit", addLanguage);
+//new
