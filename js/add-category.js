@@ -17,9 +17,22 @@ checkAuthStatus((user) => {
 const categoryForm = document.getElementById("add-category-form");
 const categoryGrid = document.getElementById("category-grid");
 const logoutButton = document.getElementById("logout-button");
+const addCategoryBtn = document.getElementById("add-category-btn");
+const modal = document.getElementById("add-category-modal");
+const closeModal = document.getElementById("close-modal");
 
 // Logout functionality
 logoutButton.addEventListener("click", logout);
+
+// Open modal
+addCategoryBtn.addEventListener("click", () => {
+  modal.classList.remove("hidden");
+});
+
+// Close modal
+closeModal.addEventListener("click", () => {
+  modal.classList.add("hidden");
+});
 
 // Handle category form submission
 categoryForm.addEventListener("submit", (e) => {
@@ -45,6 +58,7 @@ categoryForm.addEventListener("submit", (e) => {
     .then(() => {
       alert("Category added successfully!");
       categoryForm.reset();
+      modal.classList.add("hidden");
     })
     .catch((error) => {
       console.error("Error adding category:", error);
@@ -89,13 +103,8 @@ onValue(categoriesRef, (snapshot) => {
     viewButton.classList.add("view-btn");
     viewButton.addEventListener("click", () => {
       // Show languages and information for the selected category
-      alert(
-        `Viewing category: ${category.title}\nLanguages: ${JSON.stringify(
-          category.items,
-          null,
-          2
-        )}`
-      );
+
+      window.location.href = `view-items.html?categoryId=${categoryId}`;
     });
 
     // Delete button

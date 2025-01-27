@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Categories</title>
+    <title>View Items</title>
     <link rel="stylesheet" href="../css/style.css" />
   </head>
   <body>
@@ -15,51 +15,45 @@
       <div class="main-content">
         <header class="admin-header">
           <div class="header-title">
-            <h1>Manage Categories</h1>
+            <h1>Category Items</h1>
           </div>
           <div class="header-profile">
             <button id="logout-button" class="logout-btn">Logout</button>
           </div>
         </header>
 
-        <h2>Existing Categories</h2>
-        <div id="category-grid" class="grid-container"></div>
+        <h2 id="category-title"></h2>
+        <div id="item-grid" class="grid-container"></div>
 
         <!-- Floating Add Button -->
-        <button id="add-category-btn" class="floating-btn">+</button>
+        <button id="add-item-btn" class="floating-btn">+</button>
       </div>
     </div>
 
     <!-- Modal Dialog -->
-    <div id="add-category-modal" class="modal hidden">
+    <div id="add-item-modal" class="modal hidden">
       <div class="modal-content">
         <span id="close-modal" class="close-btn">&times;</span>
-        <h2>Add New Category</h2>
-        <form id="add-category-form">
+        <h2>Add New Item</h2>
+        <form id="add-item-form">
           <input
             type="text"
-            id="category-title"
-            placeholder="Category Title"
+            id="item-title"
+            placeholder="Item Title"
             required
           />
-          <input
-            type="text"
-            id="category-subtitle"
-            placeholder="Category Subtitle"
+          <textarea
+            id="item-description"
+            placeholder="Item Description"
             required
-          />
-          <input
-            type="url"
-            id="category-image"
-            placeholder="Image URL"
-            required
-          />
-          <button type="submit">Add Category</button>
+          ></textarea>
+          <input type="url" id="item-image" placeholder="Image URL" required />
+          <button type="submit">Add Item</button>
         </form>
       </div>
     </div>
 
     <script type="module" src="../js/sidebar.js"></script>
-    <script type="module" src="../js/add-category.js"></script>
+    <script type="module" src="../js/view-items.js"></script>
   </body>
 </html>
