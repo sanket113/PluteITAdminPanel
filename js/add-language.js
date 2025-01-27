@@ -10,17 +10,15 @@ import {
 import { checkAuthStatus, logout } from "../js/session.js";
 
 // DOM Elements
-const existingLanguagesContainer =
-  document.getElementById("existing-languages");
+const existingLanguagesContainer = document.getElementById("existing-languages");
 const addLanguageForm = document.getElementById("add-language-form");
 const logoutButton = document.getElementById("logout-button");
 const modal = document.getElementById("edit-language-modal");
 const closeModalBtn = document.getElementById("close-modal");
 const editLanguageForm = document.getElementById("edit-language-form");
+const categorySelect = document.getElementById("category-select"); // Category dropdown
 
-// UID for Language Category
-const languageCategoryUid = "-OHLmm-dOUlSTa4O8wzX"; // Use your actual UID here
-
+// Check if the user is authenticated
 checkAuthStatus((user) => {
   console.log(`User logged in: ${user.email}`);
 });
@@ -28,52 +26,97 @@ checkAuthStatus((user) => {
 logoutButton.addEventListener("click", logout);
 
 // Firebase reference for categories
-const categoryRef = ref(database, "categories");
+const categoriesRef = ref(database, "categories");
 
-// Function to fetch and display existing languages
-async function fetchExistingLanguages() {
+// Function to populate category dropdown
+async function populateCategoryDropdown() {
   try {
-    const snapshot = await get(categoryRef);
+    const snapshot = await get(categoriesRef);
     if (snapshot.exists()) {
-      const data = snapshot.val();
-      const languageCategory = data[languageCategoryUid];
+      const categories = snapshot.val();
+      categorySelect.innerHTML = "<option value=''>Select a category</option>"; // Clear existing options
 
-      if (languageCategory && languageCategory.items) {
-        existingLanguagesContainer.innerHTML = "";
-
-        for (let languageUid in languageCategory.items) {
-          const language = languageCategory.items[languageUid];
-
-          const languageCard = document.createElement("div");
-          languageCard.classList.add("card");
-          languageCard.dataset.uid = languageUid;
-          languageCard.innerHTML = `
-            <img src="${language.logo}" alt="${language.name}" />
-            <div class="card-content">
-              <h3 class="card-title">${language.name}</h3>
-              <p class="card-subtitle">${language.uses}</p>
-              <button class="edit-btn">Edit</button>
-              <button class="delete-btn">Delete</button>
-            </div>
-          `;
-
-          existingLanguagesContainer.appendChild(languageCard);
-
-          // Attach event listeners for edit and delete buttons
-          languageCard
-            .querySelector(".edit-btn")
-            .addEventListener("click", () =>
-              editLanguage(languageUid, language)
-            );
-          languageCard
-            .querySelector(".delete-btn")
-            .addEventListener("click", () => deleteLanguage(languageUid));
-        }
-      } else {
-        existingLanguagesContainer.innerHTML = "<p>No languages found.</p>";
+      // Add categories to dropdown
+      for (let categoryId in categories) {
+        const category = categories[categoryId];
+        const option = document.createElement("option");
+        option.value = category.title; // Use category title as the value
+        option.textContent = category.title; // Display category title
+        categorySelect.appendChild(option);
       }
     } else {
-      existingLanguagesContainer.innerHTML = "<p>No categories found.</p>";
+      console.log("No categories found.");
+    }
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
+}
+
+// Function to get the category UID based on selected category
+async function getSelectedCategoryUid() {
+  const selectedCategory = categorySelect.value;
+  if (!selectedCategory) {
+    alert("Please select a category.");
+    return null;
+  }
+
+  try {
+    const snapshot = await get(categoriesRef);
+    if (snapshot.exists()) {
+      const categories = snapshot.val();
+      for (let categoryId in categories) {
+        if (categories[categoryId].title === selectedCategory) {
+          return categoryId;
+        }
+      }
+    } else {
+      throw new Error("No categories found.");
+    }
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+  }
+}
+
+// Function to fetch and display existing languages under the selected category
+async function fetchExistingLanguages() {
+  const categoryUid = await getSelectedCategoryUid();
+  if (!categoryUid) return;
+
+  try {
+    const categoryRef = ref(database, `categories/${categoryUid}`);
+    const snapshot = await get(categoryRef);
+    if (snapshot.exists()) {
+      const categoryData = snapshot.val();
+      const languageCategory = categoryData.items;
+
+      existingLanguagesContainer.innerHTML = "";
+      for (let languageUid in languageCategory) {
+        const language = languageCategory[languageUid];
+
+        const languageCard = document.createElement("div");
+        languageCard.classList.add("card");
+        languageCard.dataset.uid = languageUid;
+        languageCard.innerHTML = `
+          <img src="${language.logo}" alt="${language.name}" />
+          <div class="card-content">
+            <h3 class="card-title">${language.name}</h3>
+            <p class="card-subtitle">${language.uses}</p>
+            <button class="edit-btn">Edit</button>
+            <button class="delete-btn">Delete</button>
+          </div>
+        `;
+        existingLanguagesContainer.appendChild(languageCard);
+
+        // Attach event listeners for edit and delete buttons
+        languageCard
+          .querySelector(".edit-btn")
+          .addEventListener("click", () => editLanguage(languageUid, language));
+        languageCard
+          .querySelector(".delete-btn")
+          .addEventListener("click", () => deleteLanguage(languageUid));
+      }
+    } else {
+      existingLanguagesContainer.innerHTML = "<p>No languages found in the selected category.</p>";
     }
   } catch (error) {
     console.error("Error fetching languages:", error);
@@ -96,11 +139,14 @@ async function addLanguage(event) {
     return;
   }
 
+  const selectedCategoryUid = await getSelectedCategoryUid();
+  if (!selectedCategoryUid) {
+    alert("Please select a category first.");
+    return;
+  }
+
   try {
-    const itemsRef = child(
-      ref(database),
-      `categories/${languageCategoryUid}/items`
-    );
+    const itemsRef = child(ref(database), `categories/${selectedCategoryUid}/items`);
     const newLanguageRef = push(itemsRef);
     const newLanguage = {
       name,
@@ -152,9 +198,10 @@ async function editLanguage(languageUid, languageData) {
     };
 
     try {
+      const categoryUid = await getSelectedCategoryUid();
       const languageRef = ref(
         database,
-        `categories/${languageCategoryUid}/items/${languageUid}`
+        `categories/${categoryUid}/items/${languageUid}`
       );
       await set(languageRef, updatedLanguage);
 
@@ -172,9 +219,10 @@ async function editLanguage(languageUid, languageData) {
 async function deleteLanguage(languageUid) {
   if (confirm("Are you sure you want to delete this language?")) {
     try {
+      const categoryUid = await getSelectedCategoryUid();
       const languageRef = ref(
         database,
-        `categories/${languageCategoryUid}/items/${languageUid}`
+        `categories/${categoryUid}/items/${languageUid}`
       );
       await remove(languageRef);
 
@@ -193,7 +241,8 @@ closeModalBtn.addEventListener("click", () => {
 });
 
 // Fetch existing languages on page load
-fetchExistingLanguages();
+populateCategoryDropdown();
+categorySelect.addEventListener("change", fetchExistingLanguages);
 
 // Add event listener for form submission
 addLanguageForm.addEventListener("submit", addLanguage);
