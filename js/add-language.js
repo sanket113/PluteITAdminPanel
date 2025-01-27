@@ -97,20 +97,23 @@ async function addLanguage(event) {
   }
 
   try {
-    const newLanguage = {
-      name,
-      uses,
-      info,
-      logo: logoUrl,
-      roadmaps: roadmapLinks,
-      basicRoadmap: roadmapLinks[0] || "",
-    };
-
     const itemsRef = child(
       ref(database),
       `categories/${languageCategoryUid}/items`
     );
     const newLanguageRef = push(itemsRef);
+    const newLanguage = {
+      name,
+      uses,
+      info,
+      uid: "" + newLanguageRef.key,
+      logo: logoUrl,
+      roadmaps: roadmapLinks,
+      basicRoadmap: roadmapLinks[0] || "",
+      technologies: [],
+      frameworks: [],
+    };
+
     await set(newLanguageRef, newLanguage);
 
     alert("Language added successfully!");
