@@ -21,7 +21,7 @@ const adminName = document.getElementById("admin-name");
 // Check session and display user details
 checkAuthStatus((user) => {
   // Show the admin's email or name
-  adminName.textContent = user.email || "Admin";
+  console.log(`User :${user.email}`);
 });
 
 // Logout button functionality
@@ -118,11 +118,26 @@ addItemForm.addEventListener("submit", (e) => {
   const title = document.getElementById("item-title").value;
   const description = document.getElementById("item-description").value;
   const image = document.getElementById("item-image").value;
+  const uses = document.getElementById("item-uses").value;
+  const basicRoadmap = document.getElementById("item-basic-roadmap").value;
+  const roadmaps = [];
+
+  for (let i = 1; i <= 4; i++) {
+    const roadmap = document.getElementById(`item-roadmap${i}`).value;
+    if (roadmap) {
+      roadmaps.push(roadmap);
+    }
+  }
+
+  console.log(roadmaps);
 
   const newItem = {
     name: title,
     info: description,
     logo: image,
+    uses: uses,
+    basicRoadmap: basicRoadmap,
+    roadmaps: roadmaps,
   };
   const itemsRef = ref(database, `categories/${categoryId}/items`);
 

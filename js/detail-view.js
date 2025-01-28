@@ -18,7 +18,7 @@ const adminName = document.getElementById("admin-name");
 // Check session and display user details
 checkAuthStatus((user) => {
   // Show the admin's email or name
-  adminName.textContent = user.email || "Admin";
+  console.log(`User : ${user.email}`);
 });
 
 // Logout button functionality
