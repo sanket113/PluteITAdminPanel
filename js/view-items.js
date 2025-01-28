@@ -6,11 +6,7 @@ import {
   remove,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { database } from "../js/firebase-config.js";
-
-// Extract the categoryId from the URL
-const urlParams = new URLSearchParams(window.location.search);
-const categoryId = urlParams.get("categoryId");
-console.log("Category ID:", categoryId);
+import { checkAuthStatus, logout } from "../js/session.js";
 
 // DOM Elements
 const categoryTitle = document.getElementById("category-title");
@@ -19,6 +15,23 @@ const addItemBtn = document.getElementById("add-item-btn");
 const addItemModal = document.getElementById("add-item-modal");
 const closeModal = document.getElementById("close-modal");
 const addItemForm = document.getElementById("add-item-form");
+const logoutButton = document.getElementById("logout-button");
+const adminName = document.getElementById("admin-name");
+
+// Check session and display user details
+checkAuthStatus((user) => {
+  // Show the admin's email or name
+  adminName.textContent = user.email || "Admin";
+});
+
+// Logout button functionality
+logoutButton.addEventListener("click", () => {
+  logout();
+});
+
+// Extract the categoryId from the URL
+const urlParams = new URLSearchParams(window.location.search);
+const categoryId = urlParams.get("categoryId");
 
 // Fetch and display items for the category
 const categoryRef = ref(database, `categories/${categoryId}`);
@@ -58,8 +71,10 @@ onValue(categoryRef, (snapshot) => {
         const viewButton = document.createElement("button");
         viewButton.textContent = "View";
         viewButton.classList.add("btn", "view-btn");
-        viewButton.addEventListener("click", () =>
-          openEditDialog(itemId, item)
+        viewButton.addEventListener(
+          "click",
+          () =>
+            (window.location.href = `detail-view.html?categoryId=${categoryId}&itemId=${itemId}`)
         );
 
         // Delete Button
@@ -134,73 +149,4 @@ function deleteItem(itemId) {
         console.error("Error deleting item:", error);
       });
   }
-}
-
-// Function to open edit dialog
-function openEditDialog(itemId, item) {
-  const modal = document.createElement("div");
-  modal.classList.add("modal");
-
-  const modalContent = document.createElement("div");
-  modalContent.classList.add("modal-content");
-
-  const closeModalBtn = document.createElement("span");
-  closeModalBtn.classList.add("close-btn");
-  closeModalBtn.textContent = "×";
-  closeModalBtn.addEventListener("click", () => modal.remove());
-
-  const title = document.createElement("h2");
-  title.textContent = "Edit Item";
-
-  const form = document.createElement("form");
-
-  const nameInput = document.createElement("input");
-  nameInput.type = "text";
-  nameInput.value = item.name;
-  nameInput.required = true;
-
-  const descInput = document.createElement("textarea");
-  descInput.value = item.info;
-  descInput.required = true;
-
-  const imageInput = document.createElement("input");
-  imageInput.type = "url";
-  imageInput.value = item.logo;
-  imageInput.required = true;
-
-  const saveButton = document.createElement("button");
-  saveButton.type = "submit";
-  saveButton.textContent = "Save";
-
-  form.appendChild(nameInput);
-  form.appendChild(descInput);
-  form.appendChild(imageInput);
-  form.appendChild(saveButton);
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    const updatedItem = {
-      name: nameInput.value,
-      info: descInput.value,
-      logo: imageInput.value,
-    };
-
-    const itemRef = ref(database, `categories/${categoryId}/items/${itemId}`);
-    update(itemRef, updatedItem)
-      .then(() => {
-        alert("Item updated successfully!");
-        modal.remove();
-      })
-      .catch((error) => {
-        console.error("Error updating item:", error);
-      });
-  });
-
-  modalContent.appendChild(closeModalBtn);
-  modalContent.appendChild(title);
-  modalContent.appendChild(form);
-  modal.appendChild(modalContent);
-
-  document.body.appendChild(modal);
 }
