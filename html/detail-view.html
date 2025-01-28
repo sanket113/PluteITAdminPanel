@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Item Details</title>
-    <link rel="stylesheet" href="../css/style.css" />
-  </head>
-  <body>
-    <div class="dashboard-container">
-      <!-- Sidebar Placeholder -->
-      <div id="sidebar-container"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Item Details</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar Placeholder -->
+    <div id="sidebar-container"></div>
 
-      <!-- Main Content -->
-      <div class="main-content">
-        <header class="admin-header">
-          <div class="header-title">
-            <h1>Item Details</h1>
-          </div>
-          <div class="header-profile">
-            <button id="logout-button" class="logout-btn">Logout</button>
-          </div>
-        </header>
+    <!-- Main Content -->
+    <div class="main-content">
+      <header class="admin-header">
+        <h1>Item Details</h1>
+        <button id="logout-button" class="logout-btn">Logout</button>
+      </header>
 
-        <div id="item-details-container" class="details-container"></div>
-      </div>
+      <section id="item-details-container" class="details-container">
+        <!-- Item Details will load dynamically -->
+      </section>
     </div>
+  </div>
 
-    <script type="module" src="../js/sidebar.js"></script>
-    <script type="module" src="../js/detail-view.js"></script>
-  </body>
+  <script type="module" src="../js/sidebar.js"></script>
+  <script type="module" src="../js/detail-view.js"></script>
+</body>
 </html>

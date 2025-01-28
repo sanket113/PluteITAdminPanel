@@ -437,3 +437,213 @@ button.delete-btn:hover {
     background-color: #f44336;
     color: white;
 }
+
+
+
+
+/*roadmap*/
+/* General Styling */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+  }
+  
+  .dashboard-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow-y: auto;
+  }
+  
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+  }
+  
+  .admin-header h1 {
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .logout-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .logout-btn:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Item Details */
+  .details-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .detail-card {
+    background: #fdfdfd;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+  }
+  
+  .detail-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .item-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 20px;
+    border: 1px solid #ddd;
+  }
+  
+  .detail-header h2 {
+    font-size: 22px;
+    color: #2c3e50;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    color: #777;
+  }
+  
+  /* Form Fields */
+  .edit-group {
+    margin-bottom: 15px;
+  }
+  
+  .edit-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  
+  .edit-group input,
+  .edit-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+  }
+  
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .update-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .update-btn:hover {
+    background-color: #2980b9;
+  }
+  
+  .error-message {
+    text-align: center;
+    color: #e74c3c;
+    font-weight: bold;
+  }
+  
+
+  /* new */
+  /* Styling for the fields with edit options */
+.field-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .field-group label {
+    width: 150px;
+    font-weight: bold;
+  }
+  
+  .field-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+  }
+  
+  .field-control input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+  }
+  
+  .field-control input:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+  }
+  
+  .edit-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .edit-btn:hover {
+    background-color: #2980b9;
+  }
+  
+  /* Save button styling */
+  .save-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .save-btn:hover {
+    background-color: #27ae60;
+  }
+  
