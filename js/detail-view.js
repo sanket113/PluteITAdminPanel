@@ -1,7 +1,4 @@
-import {
-  ref,
-  onValue,
-} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { database } from "../js/firebase-config.js";
 import { checkAuthStatus, logout } from "../js/session.js";
 
@@ -13,12 +10,10 @@ const itemId = urlParams.get("itemId");
 // DOM Elements
 const itemDetailsContainer = document.getElementById("item-details-container");
 const logoutButton = document.getElementById("logout-button");
-const adminName = document.getElementById("admin-name");
 
-// Check session and display user details
+// Check authentication status
 checkAuthStatus((user) => {
-  // Show the admin's email or name
-  console.log(`User:${user.email}`);
+  console.log(`Admin logged in: ${user.email}`);
 });
 
 // Logout button functionality
@@ -30,16 +25,80 @@ logoutButton.addEventListener("click", () => {
 const itemRef = ref(database, `categories/${categoryId}/items/${itemId}`);
 onValue(itemRef, (snapshot) => {
   const item = snapshot.val();
+
   if (item) {
+    // Populate the UI with fields and edit buttons
     itemDetailsContainer.innerHTML = `
       <div class="detail-card">
-        <img src="${item.logo}" alt="${item.name} image" />
-        <h2>${item.name}</h2>
-        <p>${item.info}</p>
+        <h2>Item Details</h2>
+
+        ${generateFieldView("Name", "name", item.name)}
+        ${generateFieldView("Logo URL", "logo", item.logo)}
+        ${generateFieldView("Uses", "uses", item.uses)}
+        ${generateFieldView("Basic Roadmap URL", "basicRoadmap", item.basicRoadmap)}
+        ${generateFieldView("Roadmap URL 1", "roadmap1", item.roadmaps?.[0] || "")}
+        ${generateFieldView("Roadmap URL 2", "roadmap2", item.roadmaps?.[1] || "")}
+        ${generateFieldView("Roadmap URL 3", "roadmap3", item.roadmaps?.[2] || "")}
+        ${generateFieldView("Roadmap URL 4", "roadmap4", item.roadmaps?.[3] || "")}
+        ${generateFieldView("Information", "info", item.info)}
+
+        <button id="save-button" class="save-btn">Save Changes</button>
       </div>
     `;
+
+    // Handle field editing
+    const editButtons = document.querySelectorAll(".edit-btn");
+    editButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const field = button.dataset.field;
+        const input = document.querySelector(`#input-${field}`);
+        input.disabled = !input.disabled;
+
+        if (input.disabled) {
+          button.textContent = "Edit";
+        } else {
+          button.textContent = "Done";
+        }
+      });
+    });
+
+    // Save updated details
+    document.getElementById("save-button").addEventListener("click", () => {
+      const updatedItem = {
+        name: document.querySelector("#input-name").value,
+        logo: document.querySelector("#input-logo").value,
+        uses: document.querySelector("#input-uses").value,
+        basicRoadmap: document.querySelector("#input-basicRoadmap").value,
+        roadmaps: [
+          document.querySelector("#input-roadmap1").value,
+          document.querySelector("#input-roadmap2").value,
+          document.querySelector("#input-roadmap3").value,
+          document.querySelector("#input-roadmap4").value,
+        ],
+        info: document.querySelector("#input-info").value,
+      };
+
+      update(itemRef, updatedItem)
+        .then(() => alert("Item updated successfully!"))
+        .catch((err) => {
+          console.error("Update error:", err);
+          alert("Failed to update item. Please try again.");
+        });
+    });
   } else {
-    itemDetailsContainer.innerHTML =
-      "<p>Item not found or no data available.</p>";
+    itemDetailsContainer.innerHTML = `<p class="error-message">Item not found or no data available.</p>`;
   }
 });
+
+// Helper function to generate field view with edit functionality
+function generateFieldView(label, field, value) {
+  return `
+    <div class="field-group">
+      <label>${label}</label>
+      <div class="field-control">
+        <input type="text" id="input-${field}" value="${value}" disabled />
+        <button class="edit-btn" data-field="${field}">Edit</button>
+      </div>
+    </div>
+  `;
+}
