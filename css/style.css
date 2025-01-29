@@ -507,3 +507,49 @@ textarea {
     color: #e74c3c;
     font-weight: bold;
 }
+
+.category-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.category-container h4 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    transition: background 0.2s;
+}
+
+.checkbox-wrapper:hover {
+    background: #f1f1f1;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+}
+
+.checkbox-wrapper label {
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+}

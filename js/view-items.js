@@ -36,42 +36,53 @@ const categoryId = urlParams.get("categoryId");
 // Fetch and display all categories (excluding current category)
 const categoriesRef = ref(database, "categories");
 let categories = {};
+
 onValue(categoriesRef, (snapshot) => {
   categories = snapshot.val() || {};
-  if (categories) {
-    categorySelectorsContainer.innerHTML = ""; // Clear previous content
-    Object.entries(categories).forEach(([catId, category]) => {
-      if (catId !== categoryId) {
-        // Create label and select element for each category
-        const label = document.createElement("label");
-        label.textContent = `${category.title}:`;
+  categorySelectorsContainer.innerHTML = ""; // Clear previous content
 
-        const select = document.createElement("select");
-        select.id = `select-${catId}`;
-        select.classList.add("category-select");
+  Object.entries(categories).forEach(([catId, category]) => {
+    if (catId !== categoryId) {
+      // Create category container
+      const categoryContainer = document.createElement("div");
+      categoryContainer.classList.add("category-container");
+      categoryContainer.dataset.categoryId = catId;
 
-        // Add a default option
-        const defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.textContent = `Select ${category.title}`;
-        select.appendChild(defaultOption);
+      // Category title
+      const categoryTitle = document.createElement("h4");
+      categoryTitle.textContent = `${category.title}`;
+      categoryContainer.appendChild(categoryTitle);
 
-        // Populate the dropdown with items in the category
-        if (category.items) {
-          Object.entries(category.items).forEach(([itemId, item]) => {
-            const option = document.createElement("option");
-            option.value = itemId;
-            option.textContent = item.name;
-            select.appendChild(option);
-          });
-        }
+      // Checkbox group
+      const checkboxGroup = document.createElement("div");
+      checkboxGroup.classList.add("checkbox-group");
 
-        // Append to the modal form
-        categorySelectorsContainer.appendChild(label);
-        categorySelectorsContainer.appendChild(select);
+      // Populate checkboxes with items
+      if (category.items) {
+        Object.entries(category.items).forEach(([itemId, item]) => {
+          const checkboxWrapper = document.createElement("div");
+          checkboxWrapper.classList.add("checkbox-wrapper");
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = itemId;
+          checkbox.id = `checkbox-${itemId}`;
+          checkbox.classList.add("category-checkbox");
+
+          const label = document.createElement("label");
+          label.htmlFor = `checkbox-${itemId}`;
+          label.textContent = item.name;
+
+          checkboxWrapper.appendChild(checkbox);
+          checkboxWrapper.appendChild(label);
+          checkboxGroup.appendChild(checkboxWrapper);
+        });
       }
-    });
-  }
+
+      categoryContainer.appendChild(checkboxGroup);
+      categorySelectorsContainer.appendChild(categoryContainer);
+    }
+  });
 });
 
 // Fetch and display items for the current category
@@ -151,6 +162,7 @@ closeModal.addEventListener("click", () => {
 });
 
 // Handle new item submission
+// Collect selected items when submitting
 addItemForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -168,32 +180,29 @@ addItemForm.addEventListener("submit", (e) => {
     }
   }
 
-  // Collect selected items from other categories
-  const relatedItems = {};
-  document.querySelectorAll(".category-select").forEach((select) => {
-    if (select.value) {
-      const selectedCategoryId = select.id.replace("select-", "");
+  // Collect selected checkboxes
+  const relatedItemsByCategory = {};
 
-      // Fetch category name from the categories object
-      const categoryName = categories[selectedCategoryId]
-        ? categories[selectedCategoryId].title
-        : "";
+  document.querySelectorAll(".category-container").forEach((categoryDiv) => {
+    const selectedCategoryId = categoryDiv.dataset.categoryId;
+    const categoryName = categories[selectedCategoryId]?.title || "";
 
-      // Fetch selected item id
-      const selectedItemId = select.value;
+    const selectedItems = Array.from(
+      categoryDiv.querySelectorAll(".category-checkbox:checked")
+    );
 
-      // Fetch item name from the selected category
+    selectedItems.forEach((checkbox) => {
+      const selectedItemId = checkbox.value;
       const selectedItemName =
         categories[selectedCategoryId]?.items[selectedItemId]?.name || "";
 
-      // Store category name, item id and item name
       if (categoryName && selectedItemName) {
-        relatedItems[selectedCategoryId] = {
-          itemId: selectedItemId,
-          itemName: selectedItemName,
-        };
+        if (!relatedItemsByCategory[categoryName]) {
+          relatedItemsByCategory[categoryName] = {};
+        }
+        relatedItemsByCategory[categoryName][selectedItemId] = selectedItemName;
       }
-    }
+    });
   });
 
   const newItem = {
@@ -203,7 +212,7 @@ addItemForm.addEventListener("submit", (e) => {
     uses: uses,
     basicRoadmap: basicRoadmap,
     roadmaps: roadmaps,
-    relatedItems: relatedItems, // Store selected related items with category names and item details
+    relatedItemsByCategory: relatedItemsByCategory,
   };
 
   const itemsRef = ref(database, `categories/${categoryId}/items`);
