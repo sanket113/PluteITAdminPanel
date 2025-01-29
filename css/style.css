@@ -1,3 +1,24 @@
+/* Logo Styling */
+
+ /* Center the logo and style it */
+/* Make the logo round and center it */
+/* Center the logo and reduce spacing */
+.logo-container {
+    text-align: center;
+    margin-bottom: -50px; /* Further decrease space */
+}
+
+.logo-container img {
+    width: 80px;  /* Make it smaller */
+    height: 80px; /* Adjust size as needed */
+    border-radius: 50%;  /* Makes the image fully round */
+    object-fit: cover;  /* Ensures the image fills the circle */
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
 /* Login Container */
 .login-container {
     max-width: 400px;
