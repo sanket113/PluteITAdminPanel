@@ -4,6 +4,7 @@ import {
   push,
   onValue,
   remove,
+  update,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { checkAuthStatus, logout } from "../js/session.js";
 import { database } from "../js/firebase-config.js";
@@ -20,18 +21,29 @@ const logoutButton = document.getElementById("logout-button");
 const addCategoryBtn = document.getElementById("add-category-btn");
 const modal = document.getElementById("add-category-modal");
 const closeModal = document.getElementById("close-modal");
+const editCategoryModal = document.getElementById("edit-category-modal"); // Edit modal
+const closeEditModal = document.getElementById("close-edit-modal");
+const editCategoryForm = document.getElementById("edit-category-form"); // Edit form
+
+let currentCategoryId = null; // Store the ID of the category being edited
 
 // Logout functionality
 logoutButton.addEventListener("click", logout);
 
-// Open modal
+// Open add modal
 addCategoryBtn.addEventListener("click", () => {
   modal.classList.remove("hidden");
 });
 
-// Close modal
+// Close add modal
 closeModal.addEventListener("click", () => {
   modal.classList.add("hidden");
+});
+
+// Close edit modal
+closeEditModal.addEventListener("click", () => {
+  editCategoryModal.classList.add("hidden");
+  currentCategoryId = null; // Reset the ID
 });
 
 // Handle category form submission
@@ -103,8 +115,22 @@ onValue(categoriesRef, (snapshot) => {
     viewButton.classList.add("view-btn");
     viewButton.addEventListener("click", () => {
       // Show languages and information for the selected category
-
       window.location.href = `view-items.html?categoryId=${categoryId}`;
+    });
+
+    // Edit button
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.classList.add("edit-btn");
+    editButton.addEventListener("click", () => {
+      // Open the edit modal and populate the form
+      currentCategoryId = categoryId; // Store the category ID being edited
+      document.getElementById("edit-category-title").value = category.title;
+      document.getElementById("edit-category-subtitle").value =
+        category.subtitle;
+      document.getElementById("edit-category-image").value = category.image;
+
+      editCategoryModal.classList.remove("hidden"); // Show the edit modal
     });
 
     // Delete button
@@ -131,6 +157,7 @@ onValue(categoriesRef, (snapshot) => {
 
     // Append buttons to button container
     buttonContainer.appendChild(viewButton);
+    buttonContainer.appendChild(editButton);
     buttonContainer.appendChild(deleteButton);
 
     // Append elements to the card
@@ -143,4 +170,66 @@ onValue(categoriesRef, (snapshot) => {
     // Add the card to the grid
     categoryGrid.appendChild(card);
   });
+});
+
+// Handle editing a category
+// Handle editing a category
+editCategoryForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  if (!currentCategoryId) {
+    alert("No category selected for editing.");
+    return;
+  }
+
+  // Get existing category data from Firebase
+  const categoryRef = ref(database, `categories/${currentCategoryId}`);
+
+  onValue(
+    categoryRef,
+    (snapshot) => {
+      const existingCategory = snapshot.val();
+
+      const updatedTitle = document.getElementById("edit-category-title").value;
+      const updatedSubtitle = document.getElementById(
+        "edit-category-subtitle"
+      ).value;
+      const updatedImage = document.getElementById("edit-category-image").value;
+
+      let updates = {};
+      let updateMessages = [];
+
+      // Compare values and only update changed fields
+      if (updatedTitle !== existingCategory.title) {
+        updates.title = updatedTitle;
+        updateMessages.push("Title updated successfully.");
+      }
+      if (updatedSubtitle !== existingCategory.subtitle) {
+        updates.subtitle = updatedSubtitle;
+        updateMessages.push("Subtitle updated successfully.");
+      }
+      if (updatedImage !== existingCategory.image) {
+        updates.image = updatedImage;
+        updateMessages.push("Image updated successfully.");
+      }
+
+      if (Object.keys(updates).length === 0) {
+        alert("No changes were made.");
+        return;
+      }
+
+      // Update the category in Firebase
+      update(categoryRef, updates)
+        .then(() => {
+          alert(updateMessages.join("\n")); // Show only updated fields
+          editCategoryModal.classList.add("hidden"); // Close the modal
+          currentCategoryId = null; // Reset the ID
+        })
+        .catch((error) => {
+          console.error("Error updating category:", error);
+          alert("Failed to update category. Please try again.");
+        });
+    },
+    { onlyOnce: true }
+  );
 });

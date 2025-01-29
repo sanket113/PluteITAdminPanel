@@ -1,3 +1,24 @@
+/* Logo Styling */
+.logo-container {
+    text-align: center;
+    margin-bottom: -50px;
+    /* Further decrease space */
+}
+
+.logo-container img {
+    width: 80px;
+    /* Make it smaller */
+    height: 80px;
+    /* Adjust size as needed */
+    border-radius: 50%;
+    /* Makes the image fully round */
+    object-fit: cover;
+    /* Ensures the image fills the circle */
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Login Container */
 .login-container {
     max-width: 400px;
@@ -71,7 +92,6 @@ h2 {
 .sidebar {
     width: 250px;
     background-color: #0288d1;
-    /* Cyan color */
     color: #fff;
     position: fixed;
     height: 100%;
@@ -86,7 +106,6 @@ h2 {
     font-size: 1.5rem;
     font-weight: bold;
     background-color: #0288d1;
-    /* Darker cyan */
     color: #fff;
 }
 
@@ -111,7 +130,6 @@ h2 {
 .sidebar-menu li a:hover {
     background-color: #0288d1;
     color: #e0f7fa;
-    /* Lighter cyan */
     padding-left: 25px;
     transition: all 0.3s;
 }
@@ -123,7 +141,6 @@ h2 {
 
 .main-content {
     margin-left: 250px;
-    /* Same as the sidebar width */
     padding: 20px;
     flex-grow: 1;
     background-color: #f9f9f9;
@@ -133,7 +150,6 @@ h2 {
 /* Admin Header */
 .admin-header {
     background-color: #0288d1;
-    /* Blue color */
     color: white;
     padding: 15px 20px;
     display: flex;
@@ -175,16 +191,38 @@ form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 input[type="text"],
-input[type="url"] {
-    padding: 10px;
-    border: 1px solid #ccc;
+input[type="url"],
+textarea {
+    width: 85%;
+    /* Makes input fields take up full width of their container */
+    padding: 15px;
+    /* Increased padding for a more spacious feel */
+    border: 2px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
+    background-color: #fff;
+    margin-bottom: 15px;
+    /* Add space between the fields */
 }
+
+/* Optional: For better readability, increase input font size */
+input[type="text"],
+input[type="url"] {
+    font-size: 18px;
+}
+
+/* Optional: Add styles for textarea if present */
+textarea {
+    resize: vertical;
+    /* Allow resizing vertically */
+    min-height: 120px;
+    /* Adjust the height */
+}
+
 
 button {
     background-color: #0288d1;
@@ -211,11 +249,17 @@ button:hover {
 
 /* Card Styles */
 .card {
-    background-color: white;
+    background-color: Steel Blue (#4682B4);
     border-radius: 8px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.15);
 }
 
 .card img {
@@ -253,6 +297,7 @@ button.view-btn {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 button.view-btn:hover {
@@ -266,122 +311,14 @@ button.delete-btn {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 button.delete-btn:hover {
     background-color: #a71d2a;
 }
 
-
-.add-language-form {
-    background-color: white;
-    padding: 20px;
-    margin-top: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.add-language-form h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.add-language-form form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.add-language-form input,
-.add-language-form textarea {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.add-language-form button {
-    background-color: #0288d1;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.add-language-form button:hover {
-    background-color: #026aa7;
-}
-
-
-.modal {
-    display: none;
-    /* Hidden by default */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-}
-
-.close-btn {
-    float: right;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.modal {
-    display: none;
-    /* Hidden by default */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-}
-
-.close-btn {
-    float: right;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.floating-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    font-size: 30px;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
+/* Modal Styling */
 .modal {
     position: fixed;
     top: 0;
@@ -404,10 +341,10 @@ button.delete-btn:hover {
     padding: 20px;
     border-radius: 10px;
     width: 90%;
-    max-width: 800px;
-    overflow: auto;
+    max-width: 700px;
     height: 90%;
     max-height: 90%;
+    overflow: auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -417,78 +354,156 @@ button.delete-btn:hover {
     cursor: pointer;
 }
 
-.button-container {
+.floating-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Roadmap */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+}
+
+.dashboard-container {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    height: 100vh;
 }
 
-.btn {
-    padding: 8px 12px;
-    font-size: 14px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.view-btn {
-    background-color: #4caf50;
-    color: white;
-}
-
-.delete-btn {
-    background-color: #f44336;
-    color: white;
-}
-
-#category-selectors{
-    display:block;
-}
-
-.category-group {
-    margin-bottom: 10px;
-}
-
-
-/* Add styles for the category dropdown */
-/* Category Dropdown */
-/* Add styles for the category dropdown */
-.category-dropdown {
-    width: 200px;
-    height: auto;
-    /* Auto height for the dropdown */
-    padding: 5px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    background-color: #fff;
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
     overflow-y: auto;
-    border-radius: 5px;
-    display: inline-block;
-    /* Makes sure it's displayed properly */
 }
 
-.category-dropdown option {
-    padding: 5px;
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #ddd;
 }
 
-/* Ensure the category selectors container is displayed correctly */
-#category-selectors {
-    display: block;
-    /* Ensures it is rendered properly */
+.admin-header h1 {
+    font-size: 24px;
+    color: #333;
 }
 
-.category-group {
-    margin-bottom: 10px;
-}
-
-.dropdown-button {
-    background-color: #008cba;
+.logout-btn {
+    background-color: #e74c3c;
     color: white;
     border: none;
-    padding: 8px;
-    cursor: pointer;
-    width: 150px;
-    text-align: left;
+    padding: 10px 20px;
     border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
 }
 
+.logout-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Item Details */
+.details-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.detail-card {
+    background: #fdfdfd;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.item-logo {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 20px;
+    border: 1px solid #ddd;
+}
+
+.detail-header h2 {
+    font-size: 22px;
+    color: #2c3e50;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #777;
+}
+
+/* Form Fields */
+.edit-group {
+    margin-bottom: 15px;
+}
+
+.edit-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.edit-group input,
+.edit-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.update-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.update-btn:hover {
+    background-color: #2980b9;
+}
+
+.error-message {
+    text-align: center;
+    color: #e74c3c;
+    font-weight: bold;
+}
