@@ -15,12 +15,12 @@ const addItemBtn = document.getElementById("add-item-btn");
 const addItemModal = document.getElementById("add-item-modal");
 const closeModal = document.getElementById("close-modal");
 const addItemForm = document.getElementById("add-item-form");
+const categorySelectorsContainer =
+  document.getElementById("category-selectors");
 const logoutButton = document.getElementById("logout-button");
-const adminName = document.getElementById("admin-name");
 
 // Check session and display user details
 checkAuthStatus((user) => {
-  // Show the admin's email or name
   console.log(`User :${user.email}`);
 });
 
@@ -29,11 +29,52 @@ logoutButton.addEventListener("click", () => {
   logout();
 });
 
-// Extract the categoryId from the URL
+// Extract the current categoryId from the URL
 const urlParams = new URLSearchParams(window.location.search);
 const categoryId = urlParams.get("categoryId");
 
-// Fetch and display items for the category
+// Fetch and display all categories (excluding current category)
+const categoriesRef = ref(database, "categories");
+let categories = {};
+onValue(categoriesRef, (snapshot) => {
+  categories = snapshot.val() || {};
+  if (categories) {
+    categorySelectorsContainer.innerHTML = ""; // Clear previous content
+    Object.entries(categories).forEach(([catId, category]) => {
+      if (catId !== categoryId) {
+        // Create label and select element for each category
+        const label = document.createElement("label");
+        label.textContent = `${category.title}:`;
+
+        const select = document.createElement("select");
+        select.id = `select-${catId}`;
+        select.classList.add("category-select");
+
+        // Add a default option
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = `Select ${category.title}`;
+        select.appendChild(defaultOption);
+
+        // Populate the dropdown with items in the category
+        if (category.items) {
+          Object.entries(category.items).forEach(([itemId, item]) => {
+            const option = document.createElement("option");
+            option.value = itemId;
+            option.textContent = item.name;
+            select.appendChild(option);
+          });
+        }
+
+        // Append to the modal form
+        categorySelectorsContainer.appendChild(label);
+        categorySelectorsContainer.appendChild(select);
+      }
+    });
+  }
+});
+
+// Fetch and display items for the current category
 const categoryRef = ref(database, `categories/${categoryId}`);
 onValue(categoryRef, (snapshot) => {
   const category = snapshot.val();
@@ -42,9 +83,7 @@ onValue(categoryRef, (snapshot) => {
     itemGrid.innerHTML = ""; // Clear the grid before updating
 
     if (category.items && typeof category.items === "object") {
-      const items = Object.entries(category.items); // Get key-value pairs
-
-      items.forEach(([itemId, item]) => {
+      Object.entries(category.items).forEach(([itemId, item]) => {
         const card = document.createElement("div");
         card.classList.add("card");
 
@@ -129,7 +168,33 @@ addItemForm.addEventListener("submit", (e) => {
     }
   }
 
-  console.log(roadmaps);
+  // Collect selected items from other categories
+  const relatedItems = {};
+  document.querySelectorAll(".category-select").forEach((select) => {
+    if (select.value) {
+      const selectedCategoryId = select.id.replace("select-", "");
+
+      // Fetch category name from the categories object
+      const categoryName = categories[selectedCategoryId]
+        ? categories[selectedCategoryId].title
+        : "";
+
+      // Fetch selected item id
+      const selectedItemId = select.value;
+
+      // Fetch item name from the selected category
+      const selectedItemName =
+        categories[selectedCategoryId]?.items[selectedItemId]?.name || "";
+
+      // Store category name, item id and item name
+      if (categoryName && selectedItemName) {
+        relatedItems[selectedCategoryId] = {
+          itemId: selectedItemId,
+          itemName: selectedItemName,
+        };
+      }
+    }
+  });
 
   const newItem = {
     name: title,
@@ -138,7 +203,9 @@ addItemForm.addEventListener("submit", (e) => {
     uses: uses,
     basicRoadmap: basicRoadmap,
     roadmaps: roadmaps,
+    relatedItems: relatedItems, // Store selected related items with category names and item details
   };
+
   const itemsRef = ref(database, `categories/${categoryId}/items`);
 
   push(itemsRef, newItem)

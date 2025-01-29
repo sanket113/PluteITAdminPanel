@@ -404,7 +404,10 @@ button.delete-btn:hover {
     padding: 20px;
     border-radius: 10px;
     width: 90%;
-    max-width: 400px;
+    max-width: 800px;
+    overflow: auto;
+    height: 90%;
+    max-height: 90%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -437,3 +440,55 @@ button.delete-btn:hover {
     background-color: #f44336;
     color: white;
 }
+
+#category-selectors{
+    display:block;
+}
+
+.category-group {
+    margin-bottom: 10px;
+}
+
+
+/* Add styles for the category dropdown */
+/* Category Dropdown */
+/* Add styles for the category dropdown */
+.category-dropdown {
+    width: 200px;
+    height: auto;
+    /* Auto height for the dropdown */
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    overflow-y: auto;
+    border-radius: 5px;
+    display: inline-block;
+    /* Makes sure it's displayed properly */
+}
+
+.category-dropdown option {
+    padding: 5px;
+}
+
+/* Ensure the category selectors container is displayed correctly */
+#category-selectors {
+    display: block;
+    /* Ensures it is rendered properly */
+}
+
+.category-group {
+    margin-bottom: 10px;
+}
+
+.dropdown-button {
+    background-color: #008cba;
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    width: 150px;
+    text-align: left;
+    border-radius: 5px;
+}
+
