@@ -197,7 +197,7 @@ form {
 input[type="text"],
 input[type="url"],
 textarea {
-    width: 85%;
+    width: 70%;
     /* Makes input fields take up full width of their container */
     padding: 15px;
     /* Increased padding for a more spacious feel */
@@ -384,7 +384,7 @@ body {
 
 .main-content {
     flex-grow: 1;
-    padding: 20px;
+    padding: 40px 30px;
     background: #ffffff;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
@@ -397,11 +397,14 @@ body {
     align-items: center;
     padding-bottom: 20px;
     border-bottom: 2px solid #ddd;
+    margin-bottom: 30px;
+    /* Adds spacing between header and content */
 }
 
 .admin-header h1 {
     font-size: 24px;
     color: #333;
+    font-weight: 600;
 }
 
 .logout-btn {
@@ -412,6 +415,7 @@ body {
     border-radius: 5px;
     font-size: 14px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .logout-btn:hover {
@@ -420,18 +424,25 @@ body {
 
 /* Item Details */
 .details-container {
-    margin-top: 20px;
     display: flex;
     justify-content: center;
+    align-items: flex-start;
+    /* Adjusted for better alignment */
+    flex-direction: column;
+    padding: 20px;
+    min-height: 50vh;
+    /* Ensures at least half the viewport height */
 }
 
 .detail-card {
     background: #fdfdfd;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    padding: 25px;
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
+    box-sizing: border-box;
+    margin: 0 auto;
 }
 
 .detail-header {
@@ -441,8 +452,8 @@ body {
 }
 
 .item-logo {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     object-fit: cover;
     border-radius: 8px;
     margin-right: 20px;
@@ -450,8 +461,9 @@ body {
 }
 
 .detail-header h2 {
-    font-size: 22px;
+    font-size: 26px;
     color: #2c3e50;
+    font-weight: 600;
 }
 
 .subtitle {
@@ -461,34 +473,44 @@ body {
 
 /* Form Fields */
 .edit-group {
-    margin-bottom: 15px;
+    margin-bottom: 25px;
 }
 
 .edit-group label {
     display: block;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: #333;
 }
 
 .edit-group input,
 .edit-group textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 15px;
     background-color: #fff;
+    transition: border 0.3s ease;
+}
+
+.edit-group input:focus,
+.edit-group textarea:focus {
+    border-color: #3498db;
+    /* Focused state for better UX */
+    outline: none;
 }
 
 textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 120px;
 }
 
 .update-btn {
     display: block;
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background-color: #3498db;
     color: #fff;
     border: none;
@@ -496,6 +518,7 @@ textarea {
     font-size: 16px;
     cursor: pointer;
     text-align: center;
+    transition: background-color 0.3s ease;
 }
 
 .update-btn:hover {
@@ -506,36 +529,40 @@ textarea {
     text-align: center;
     color: #e74c3c;
     font-weight: bold;
+    font-size: 14px;
+    margin-top: 10px;
 }
 
+/* Category Section */
 .category-container {
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: 30px;
+    padding: 20px;
     border-radius: 8px;
     background-color: #f9f9f9;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .category-container h4 {
-    margin-bottom: 10px;
-    font-size: 18px;
+    margin-bottom: 15px;
+    font-size: 20px;
     color: #333;
+    font-weight: 600;
 }
 
 .checkbox-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 15px;
 }
 
 .checkbox-wrapper {
     display: flex;
     align-items: center;
     background: #fff;
-    padding: 8px 12px;
+    padding: 10px 15px;
     border-radius: 5px;
     border: 1px solid #ddd;
-    transition: background 0.2s;
+    transition: background 0.2s ease;
 }
 
 .checkbox-wrapper:hover {
@@ -543,13 +570,35 @@ textarea {
 }
 
 .checkbox-wrapper input[type="checkbox"] {
-    margin-right: 8px;
-    width: 16px;
-    height: 16px;
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
 }
 
 .checkbox-wrapper label {
-    font-size: 14px;
+    font-size: 15px;
     color: #555;
     cursor: pointer;
 }
+
+/* Save Button */
+.save-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 30px;
+    transition: background-color 0.3s ease;
+}
+
+.save-btn:hover {
+    background-color: #27ae60;
+}
+
+/* above is detail view from roadmap */

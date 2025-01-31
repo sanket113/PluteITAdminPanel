@@ -1,5 +1,6 @@
 import {
   ref,
+  get,
   onValue,
   push,
   update,
@@ -18,10 +19,12 @@ const addItemForm = document.getElementById("add-item-form");
 const categorySelectorsContainer =
   document.getElementById("category-selectors");
 const logoutButton = document.getElementById("logout-button");
+const usesContainer = document.getElementById("uses-container"); // Container for uses
+const addUseButton = document.getElementById("add-use-btn"); // Button for adding uses
 
 // Check session and display user details
 checkAuthStatus((user) => {
-  console.log(`User :${user.email}`);
+  console.log(`User: ${user.email}`);
 });
 
 // Logout button functionality
@@ -158,19 +161,23 @@ addItemBtn.addEventListener("click", () => {
 });
 
 closeModal.addEventListener("click", () => {
+  // Remove all use entries when modal is closed
+  const useEntries = document.querySelectorAll(".use-entry");
+  useEntries.forEach((useEntry) => useEntry.remove());
+
+  // Hide the modal
   addItemModal.classList.add("hidden");
 });
 
 // Handle new item submission
-// Collect selected items when submitting
-addItemForm.addEventListener("submit", (e) => {
+addItemForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const title = document.getElementById("item-title").value;
   const description = document.getElementById("item-description").value;
   const image = document.getElementById("item-image").value;
-  const uses = document.getElementById("item-uses").value;
   const basicRoadmap = document.getElementById("item-basic-roadmap").value;
+  const shortDescription = document.getElementById("short-description");
   const roadmaps = [];
 
   for (let i = 1; i <= 4; i++) {
@@ -180,8 +187,22 @@ addItemForm.addEventListener("submit", (e) => {
     }
   }
 
-  // Collect selected checkboxes
+  // Collect uses data (modified to store title and description separately)
+  const uses = [];
+  document.querySelectorAll(".use-entry").forEach((useDiv) => {
+    const useName = useDiv.querySelector(".use-name").value;
+    const useDescription = useDiv.querySelector(".use-description").value;
+    if (useName && useDescription) {
+      uses.push({
+        title: useName, // Store name as title
+        description: useDescription, // Store description as description
+      });
+    }
+  });
+
+  // Collect selected related items
   const relatedItemsByCategory = {};
+  const relatedItemsToUpdate = [];
 
   document.querySelectorAll(".category-container").forEach((categoryDiv) => {
     const selectedCategoryId = categoryDiv.dataset.categoryId;
@@ -201,6 +222,13 @@ addItemForm.addEventListener("submit", (e) => {
           relatedItemsByCategory[categoryName] = {};
         }
         relatedItemsByCategory[categoryName][selectedItemId] = selectedItemName;
+
+        // Store related item details for updating the reverse relation
+        relatedItemsToUpdate.push({
+          selectedCategoryId,
+          selectedItemId,
+          selectedItemName,
+        });
       }
     });
   });
@@ -208,8 +236,9 @@ addItemForm.addEventListener("submit", (e) => {
   const newItem = {
     name: title,
     info: description,
+    shortinfo: shortDescription,
     logo: image,
-    uses: uses,
+    uses: uses, // Now stores uses as objects with title and description
     basicRoadmap: basicRoadmap,
     roadmaps: roadmaps,
     relatedItemsByCategory: relatedItemsByCategory,
@@ -217,27 +246,153 @@ addItemForm.addEventListener("submit", (e) => {
 
   const itemsRef = ref(database, `categories/${categoryId}/items`);
 
-  push(itemsRef, newItem)
-    .then(() => {
-      alert("Item added successfully!");
-      addItemForm.reset();
-      addItemModal.classList.add("hidden");
-    })
-    .catch((error) => {
-      console.error("Error adding item:", error);
-    });
+  try {
+    const newItemRef = push(itemsRef, newItem);
+    const newItemId = newItemRef.key; // Get UID of the newly added item
+
+    // Add reverse relations in related items
+    for (const {
+      selectedCategoryId,
+      selectedItemId,
+      selectedItemName,
+    } of relatedItemsToUpdate) {
+      const relatedItemRef = ref(
+        database,
+        `categories/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${categories[categoryId]?.title}`
+      );
+
+      // Fetch existing relations to avoid duplicates
+      const snapshot = await get(relatedItemRef);
+
+      if (!snapshot.exists() || !snapshot.val()[newItemId]) {
+        // Add the reverse relation only if it's not already there
+        await update(relatedItemRef, { [newItemId]: title });
+      }
+    }
+
+    alert("Item added successfully!");
+    addItemForm.reset();
+    addItemModal.classList.add("hidden");
+  } catch (error) {
+    console.error("Error adding item:", error);
+  }
 });
 
 // Function to delete an item
-function deleteItem(itemId) {
-  if (confirm("Are you sure you want to delete this item?")) {
+// Function to delete an item and its references
+async function deleteItem(itemId) {
+  if (!confirm("Are you sure you want to delete this item?")) return;
+
+  try {
     const itemRef = ref(database, `categories/${categoryId}/items/${itemId}`);
-    remove(itemRef)
-      .then(() => {
-        alert("Item deleted successfully!");
-      })
-      .catch((error) => {
-        console.error("Error deleting item:", error);
-      });
+    const itemSnapshot = await get(itemRef);
+
+    if (!itemSnapshot.exists()) {
+      alert("Item not found!");
+      return;
+    }
+
+    const itemData = itemSnapshot.val();
+
+    // Step 1: Remove references from related items
+    if (itemData.relatedItemsByCategory) {
+      for (const [relatedCategoryName, relatedItems] of Object.entries(
+        itemData.relatedItemsByCategory
+      )) {
+        for (const [relatedItemId] of Object.entries(relatedItems)) {
+          // Find the related category ID
+          const relatedCategoryId = Object.keys(categories).find(
+            (key) => categories[key].title === relatedCategoryName
+          );
+
+          if (relatedCategoryId) {
+            const relatedItemRef = ref(
+              database,
+              `categories/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${categories[categoryId]?.title}`
+            );
+
+            // Fetch the related item's category reference
+            const relatedItemSnapshot = await get(relatedItemRef);
+            if (relatedItemSnapshot.exists()) {
+              let relatedItemData = relatedItemSnapshot.val();
+
+              // Collect keys to be deleted
+              const itemsToDelete = [];
+
+              for (const relatedItem in relatedItemData) {
+                if (relatedItem === itemId) {
+                  itemsToDelete.push(relatedItem);
+                }
+              }
+
+              // Delete marked items
+              itemsToDelete.forEach((item) => {
+                relatedItemData[item] = null;
+              });
+
+              if (Object.keys(relatedItemData).length === 0) {
+                await remove(relatedItemRef);
+              } else {
+                await update(relatedItemRef, relatedItemData);
+              }
+            }
+
+            // Step 2: Check if the subcategory (e.g., "Languages") is empty and remove it
+            const categoryRef = ref(
+              database,
+              `categories/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory`
+            );
+            const categorySnapshot = await get(categoryRef);
+
+            if (categorySnapshot.exists()) {
+              let relatedCategories = categorySnapshot.val();
+
+              // Check if "Languages" (subcategory) is empty
+              if (relatedCategories[relatedCategoryName]) {
+                if (
+                  Object.keys(relatedCategories[relatedCategoryName]).length ===
+                  0
+                ) {
+                  delete relatedCategories[relatedCategoryName];
+
+                  // If `relatedItemsByCategory` itself is empty, remove it entirely
+                  if (Object.keys(relatedCategories).length === 0) {
+                    await remove(categoryRef);
+                  } else {
+                    await update(categoryRef, relatedCategories);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Step 3: Remove the item itself
+    await remove(itemRef);
+    alert("Item and its references deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting item:", error);
   }
 }
+
+// Add new use case input fields
+addUseButton.addEventListener("click", () => {
+  const useEntry = document.createElement("div");
+  useEntry.classList.add("use-entry");
+
+  const useNameInput = document.createElement("input");
+  useNameInput.type = "text";
+  useNameInput.classList.add("use-name");
+  useNameInput.placeholder = "Use Name";
+  useEntry.appendChild(useNameInput);
+
+  const useDescriptionInput = document.createElement("input");
+  useDescriptionInput.type = "text";
+  useDescriptionInput.classList.add("use-description");
+  useDescriptionInput.placeholder = "Use Description";
+  useEntry.appendChild(useDescriptionInput);
+
+  usesContainer.appendChild(useEntry);
+});
