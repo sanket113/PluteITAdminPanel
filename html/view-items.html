@@ -47,7 +47,33 @@
             placeholder="Item Description"
             required
           ></textarea>
+          <!-- Add a new input field for short description -->
+<label for="item-short-description">Short Description:</label>
+<input type="text" id="item-short-description" placeholder="Enter short description" required>
+
+<!-- Modify the "Uses" section -->
+    <div id="uses-container">
+      <div class="use-item">
+   
+      </div>
+    </div>
+      <button type="button" id="add-use-btn" class="add-use-btn">+ Add Uses</button>
+
           <input type="url" id="item-image" placeholder="Image URL" required />
+          <input
+            type="url"
+            id="item-basic-roadmap"
+            placeholder="Basic Roadmap URL"
+            required
+          />
+
+          <input type="text" id="item-roadmap1" placeholder="Roadmap url" />
+          <input type="text" id="item-roadmap2" placeholder="Roadmap url" />
+          <input type="text" id="item-roadmap3" placeholder="Roadmap url" />
+          <input type="text" id="item-roadmap4" placeholder="Roadmap url" />
+
+          <div id="category-selectors"></div>
+
           <button type="submit">Add Item</button>
         </form>
       </div>

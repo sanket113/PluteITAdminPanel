@@ -126,7 +126,8 @@ onValue(categoriesRef, (snapshot) => {
       // Open the edit modal and populate the form
       currentCategoryId = categoryId; // Store the category ID being edited
       document.getElementById("edit-category-title").value = category.title;
-      document.getElementById("edit-category-subtitle").value = category.subtitle;
+      document.getElementById("edit-category-subtitle").value =
+        category.subtitle;
       document.getElementById("edit-category-image").value = category.image;
 
       editCategoryModal.classList.remove("hidden"); // Show the edit modal
@@ -183,47 +184,52 @@ editCategoryForm.addEventListener("submit", (e) => {
 
   // Get existing category data from Firebase
   const categoryRef = ref(database, `categories/${currentCategoryId}`);
-  
-  onValue(categoryRef, (snapshot) => {
-    const existingCategory = snapshot.val();
-    
-    const updatedTitle = document.getElementById("edit-category-title").value;
-    const updatedSubtitle = document.getElementById("edit-category-subtitle").value;
-    const updatedImage = document.getElementById("edit-category-image").value;
 
-    let updates = {};
-    let updateMessages = [];
+  onValue(
+    categoryRef,
+    (snapshot) => {
+      const existingCategory = snapshot.val();
 
-    // Compare values and only update changed fields
-    if (updatedTitle !== existingCategory.title) {
-      updates.title = updatedTitle;
-      updateMessages.push("Title updated successfully.");
-    }
-    if (updatedSubtitle !== existingCategory.subtitle) {
-      updates.subtitle = updatedSubtitle;
-      updateMessages.push("Subtitle updated successfully.");
-    }
-    if (updatedImage !== existingCategory.image) {
-      updates.image = updatedImage;
-      updateMessages.push("Image updated successfully.");
-    }
+      const updatedTitle = document.getElementById("edit-category-title").value;
+      const updatedSubtitle = document.getElementById(
+        "edit-category-subtitle"
+      ).value;
+      const updatedImage = document.getElementById("edit-category-image").value;
 
-    if (Object.keys(updates).length === 0) {
-      alert("No changes were made.");
-      return;
-    }
+      let updates = {};
+      let updateMessages = [];
 
-    // Update the category in Firebase
-    update(categoryRef, updates)
-      .then(() => {
-        alert(updateMessages.join("\n")); // Show only updated fields
-        editCategoryModal.classList.add("hidden"); // Close the modal
-        currentCategoryId = null; // Reset the ID
-      })
-      .catch((error) => {
-        console.error("Error updating category:", error);
-        alert("Failed to update category. Please try again.");
-      });
-  }, { onlyOnce: true });
+      // Compare values and only update changed fields
+      if (updatedTitle !== existingCategory.title) {
+        updates.title = updatedTitle;
+        updateMessages.push("Title updated successfully.");
+      }
+      if (updatedSubtitle !== existingCategory.subtitle) {
+        updates.subtitle = updatedSubtitle;
+        updateMessages.push("Subtitle updated successfully.");
+      }
+      if (updatedImage !== existingCategory.image) {
+        updates.image = updatedImage;
+        updateMessages.push("Image updated successfully.");
+      }
+
+      if (Object.keys(updates).length === 0) {
+        alert("No changes were made.");
+        return;
+      }
+
+      // Update the category in Firebase
+      update(categoryRef, updates)
+        .then(() => {
+          alert(updateMessages.join("\n")); // Show only updated fields
+          editCategoryModal.classList.add("hidden"); // Close the modal
+          currentCategoryId = null; // Reset the ID
+        })
+        .catch((error) => {
+          console.error("Error updating category:", error);
+          alert("Failed to update category. Please try again.");
+        });
+    },
+    { onlyOnce: true }
+  );
 });
-
