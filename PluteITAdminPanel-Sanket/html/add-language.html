@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Language</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+      }
+
+      .close-btn {
+        float: right;
+        font-size: 20px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar Placeholder -->
+      <div id="sidebar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <header class="admin-header">
+          <div class="header-title">
+            <h1>Add New Language</h1>
+          </div>
+          <div class="header-profile">
+            <button id="logout-button" class="logout-btn">Logout</button>
+          </div>
+        </header>
+
+        <section class="dashboard-preview">
+          <h2>Existing Languages</h2>
+          <div id="existing-languages" class="grid-container">
+            <!-- Dynamically populated existing languages will appear here -->
+          </div>
+        </section>
+
+        <section class="add-language-form">
+          <select id="category-select">
+            <option value="">Select Category</option>
+            <option value="Language">Language</option>
+            <option value="Framework">Framework</option>
+            <option value="Technology">Technology</option>
+          </select>
+          
+          <h2>Add a New Language</h2>
+          <form id="add-language-form">
+            <input
+              type="text"
+              id="language-name"
+              placeholder="Language Name"
+              required
+            />
+            <textarea
+              id="language-uses"
+              placeholder="Uses (e.g., Web Development, AI)"
+              required
+            ></textarea>
+            <textarea
+              id="language-info"
+              placeholder="Detailed Information (HTML allowed)"
+              required
+            ></textarea>
+            <label for="language-logo">Paste Language Logo URL:</label>
+            <input
+              type="url"
+              id="language-logo"
+              placeholder="https://example.com/logo.png"
+              required
+            />
+            <label for="language-roadmaps"
+              >Paste Roadmap URLs (comma separated):</label
+            >
+            <input
+              type="text"
+              id="language-roadmaps"
+              placeholder="Roadmaps"
+              required
+            />
+            <button type="submit">Add Language</button>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- Edit Language Modal -->
+    <div id="edit-language-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" id="close-modal">&times;</span>
+        <h2>Edit Language</h2>
+        <form id="edit-language-form">
+          <input
+            type="text"
+            id="edit-language-name"
+            placeholder="Language Name"
+            required
+          />
+          <textarea
+            id="edit-language-uses"
+            placeholder="Uses"
+            required
+          ></textarea>
+          <textarea
+            id="edit-language-info"
+            placeholder="Detailed Information"
+            required
+          ></textarea>
+          <label for="edit-language-logo">Logo URL:</label>
+          <input
+            type="url"
+            id="edit-language-logo"
+            placeholder="Logo URL"
+            required
+          />
+          <label for="edit-language-roadmaps"
+            >Roadmaps (comma separated):</label
+          >
+          <input
+            type="text"
+            id="edit-language-roadmaps"
+            placeholder="Roadmaps"
+            required
+          />
+          <button type="submit">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <script type="module" src="../js/sidebar.js"></script>
+    <script type="module" src="../js/add-language.js"></script>
+  </body>
+</html>
