@@ -109,7 +109,7 @@ onValue(categoriesRef, (snapshot) => {
     const buttonContainer = document.createElement("div");
     buttonContainer.classList.add("button-container");
 
-    // View button
+    //View button
     const viewButton = document.createElement("button");
     viewButton.textContent = "View";
     viewButton.classList.add("view-btn");
@@ -117,6 +117,10 @@ onValue(categoriesRef, (snapshot) => {
       // Show languages and information for the selected category
       window.location.href = `view-items.html?categoryId=${categoryId}`;
     });
+
+    // card.addEventListener("click", () => {
+    //   window.location.href = `view-items.html?categoryId=${categoryId}`;
+    // });
 
     // Edit button
     const editButton = document.createElement("button");
@@ -156,7 +160,7 @@ onValue(categoriesRef, (snapshot) => {
     });
 
     // Append buttons to button container
-    buttonContainer.appendChild(viewButton);
+    // buttonContainer.appendChild(viewButton);
     buttonContainer.appendChild(editButton);
     buttonContainer.appendChild(deleteButton);
 

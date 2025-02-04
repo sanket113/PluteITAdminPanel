@@ -5,6 +5,7 @@ import {
   push,
   update,
   remove,
+  set
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { database } from "../js/firebase-config.js";
 import { checkAuthStatus, logout } from "../js/session.js";
@@ -179,7 +180,7 @@ addItemForm.addEventListener("submit", async (e) => {
   const basicRoadmap = document.getElementById("item-basic-roadmap").value;
   const shortDescription = document.getElementById("short-description");
   const roadmaps = [];
-
+  const all_about_img=document.getElementById("all=about-img").value;
   for (let i = 1; i <= 4; i++) {
     const roadmap = document.getElementById(`item-roadmap${i}`).value;
     if (roadmap) {
@@ -233,21 +234,26 @@ addItemForm.addEventListener("submit", async (e) => {
     });
   });
 
-  const newItem = {
-    name: title,
-    info: description,
-    shortinfo: shortDescription,
-    logo: image,
-    uses: uses, // Now stores uses as objects with title and description
-    basicRoadmap: basicRoadmap,
-    roadmaps: roadmaps,
-    relatedItemsByCategory: relatedItemsByCategory,
-  };
+  
 
-  const itemsRef = ref(database, `categories/${categoryId}/items`);
 
   try {
-    const newItemRef = push(itemsRef, newItem);
+    const itemsRef = ref(database, `categories/${categoryId}/items`);
+
+    const newItemRef = push(itemsRef);
+    const newItem = {
+      name: title,
+      info: description,
+      shortinfo: shortDescription,
+      logo: image,
+      uses: uses, // Now stores uses as objects with title and description
+      basicRoadmap: basicRoadmap,
+      roadmaps: roadmaps,
+      allAbout:all_about_img,
+      relatedItemsByCategory: relatedItemsByCategory,
+      uid:""+newItemRef.key
+    };
+    await set(newItemRef,newItem);
     const newItemId = newItemRef.key; // Get UID of the newly added item
 
     // Add reverse relations in related items

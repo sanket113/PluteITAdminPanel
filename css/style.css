@@ -255,6 +255,7 @@ button:hover {
     overflow: hidden;
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
 }
 
 .card:hover {
@@ -270,6 +271,7 @@ button:hover {
 
 .card-content {
     padding: 15px;
+    cursor: pointer;
 }
 
 .card-title {
@@ -286,7 +288,7 @@ button:hover {
 /* Buttons container */
 .button-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     padding: 10px;
 }
 

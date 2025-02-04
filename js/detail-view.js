@@ -38,32 +38,12 @@ onValue(itemRef, (snapshot) => {
         <h2>Item Details</h2>
         ${generateFieldView("Name", "name", item.name)}
         ${generateFieldView("Logo URL", "logo", item.logo)}
-        ${generateFieldView("Uses", "uses", item.uses)}
-        ${generateFieldView(
-          "Basic Roadmap URL",
-          "basicRoadmap",
-          item.basicRoadmap
-        )}
-        ${generateFieldView(
-          "Roadmap URL 1",
-          "roadmap1",
-          item.roadmaps?.[0] || ""
-        )}
-        ${generateFieldView(
-          "Roadmap URL 2",
-          "roadmap2",
-          item.roadmaps?.[1] || ""
-        )}
-        ${generateFieldView(
-          "Roadmap URL 3",
-          "roadmap3",
-          item.roadmaps?.[2] || ""
-        )}
-        ${generateFieldView(
-          "Roadmap URL 4",
-          "roadmap4",
-          item.roadmaps?.[3] || ""
-        )}
+        ${generateUsesFieldView(item.uses || [])}
+        ${generateFieldView("Basic Roadmap URL", "basicRoadmap", item.basicRoadmap)}
+        ${generateFieldView("Roadmap URL 1", "roadmap1", item.roadmaps?.[0] || "")}
+        ${generateFieldView("Roadmap URL 2", "roadmap2", item.roadmaps?.[1] || "")}
+        ${generateFieldView("Roadmap URL 3", "roadmap3", item.roadmaps?.[2] || "")}
+        ${generateFieldView("Roadmap URL 4", "roadmap4", item.roadmaps?.[3] || "")}
         ${generateFieldView("Information", "info", item.info)}
       </div>
     `;
@@ -81,10 +61,92 @@ onValue(itemRef, (snapshot) => {
       });
     });
 
-    // Save button event
+    // Add functionality to manage "Uses" items
+    document.getElementById("add-uses-btn").addEventListener("click", addUsesItem);
+    document.querySelectorAll(".remove-uses-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        const index = button.dataset.index;
+        removeUsesItem(index);
+      });
+    });
+
+    // Attach save button event after rendering the UI
     saveButton.onclick = saveItemDetails;
   }
 });
+
+// Helper function to generate "Uses" array fields
+function generateUsesFieldView(uses) {
+  let usesFields = `<h3>Uses</h3><div id="uses-container">`; // Add an ID for targeting
+
+  uses.forEach((use, index) => {
+    usesFields += `
+      <div class="field-group" data-index="${index}">
+        <label for="input-uses-title-${index}">Title</label>
+        <input type="text" id="input-uses-title-${index}" value="${use.title}" disabled />
+        <label for="input-uses-desc-${index}">Description</label>
+        <input type="text" id="input-uses-desc-${index}" value="${use.description}" disabled />
+        <button class="edit-btn" data-field="uses-title-${index}">Edit Title</button>
+        <button class="edit-btn" data-field="uses-desc-${index}">Edit Description</button>
+        <button class="remove-uses-btn" data-index="${index}">Remove</button>
+      </div>
+    `;
+  });
+
+  usesFields += `</div><button id="add-uses-btn">Add Use</button>`; // Ensure new items are inside this container
+  return usesFields;
+}
+
+
+
+// Function to add a new "Use" item
+function addUsesItem() {
+  const usesContainer = document.getElementById("uses-container"); // Ensure this container exists
+  if (!usesContainer) {
+    console.error("Uses container not found!");
+    return;
+  }
+
+  const existingUses = usesContainer.querySelectorAll(".field-group[data-index]");
+  const newUseIndex = existingUses.length; // Get current count to assign the next index
+
+  // Create a new field-group div
+  const newFieldGroup = document.createElement("div");
+  newFieldGroup.classList.add("field-group");
+  newFieldGroup.dataset.index = newUseIndex; // Properly set the index
+
+  newFieldGroup.innerHTML = `
+    <label for="input-uses-title-${newUseIndex}">Title</label>
+    <input type="text" id="input-uses-title-${newUseIndex}" value="" />
+    <label for="input-uses-desc-${newUseIndex}">Description</label>
+    <input type="text" id="input-uses-desc-${newUseIndex}" value="" />
+    <button class="remove-uses-btn" data-index="${newUseIndex}">Remove</button>
+  `;
+
+  usesContainer.appendChild(newFieldGroup);
+
+  // Attach event listener for the newly created remove button
+  newFieldGroup.querySelector(`.remove-uses-btn`).addEventListener("click", function () {
+    removeUsesItem(newUseIndex);
+  });
+}
+
+
+// Function to remove a "Use" item
+function removeUsesItem(index) {
+  const targetElement = document.querySelector(`.field-group[data-index="${index}"]`);
+  if (targetElement) {
+    targetElement.remove();
+
+    // Re-index remaining "Uses" items to prevent missing index issues
+    document.querySelectorAll(".field-group[data-index]").forEach((el, newIndex) => {
+      el.dataset.index = newIndex;
+      el.querySelector(".remove-uses-btn").dataset.index = newIndex;
+    });
+  } else {
+    console.error(`Element with index ${index} not found.`);
+  }
+}
 
 // Fetch categories and display related item checkboxes
 function fetchCategoriesForRelationship(currentRelatedItems) {
@@ -149,17 +211,40 @@ function fetchCategoriesForRelationship(currentRelatedItems) {
 
 // Save item details, including related items
 function saveItemDetails() {
-  const name = document.getElementById("input-name").value;
-  const logo = document.getElementById("input-logo").value;
-  const uses = document.getElementById("input-uses").value;
-  const basicRoadmap = document.getElementById("input-basicRoadmap").value;
-  const roadmaps = [
-    document.getElementById("input-roadmap1").value,
-    document.getElementById("input-roadmap2").value,
-    document.getElementById("input-roadmap3").value,
-    document.getElementById("input-roadmap4").value,
+  const nameInput = document.getElementById("input-name");
+  const logoInput = document.getElementById("input-logo");
+  const usesInput = document.getElementById("input-uses");
+  const basicRoadmapInput = document.getElementById("input-basicRoadmap");
+  const roadmapInputs = [
+    document.getElementById("input-roadmap1"),
+    document.getElementById("input-roadmap2"),
+    document.getElementById("input-roadmap3"),
+    document.getElementById("input-roadmap4")
   ];
-  const info = document.getElementById("input-info").value;
+  const infoInput = document.getElementById("input-info");
+
+  if (!nameInput || !logoInput || !basicRoadmapInput || !infoInput) {
+    console.error("One or more required input fields are missing.");
+    return;
+  }
+
+  const name = nameInput.value;
+  const logo = logoInput.value;
+  const uses = [];
+  document.querySelectorAll(".field-group").forEach((group) => {
+    const titleInput = group.querySelector('[id^="input-uses-title"]');
+    const descInput = group.querySelector('[id^="input-uses-desc"]');
+  
+    if (titleInput && descInput) {
+      uses.push({
+        title: titleInput.value,
+        description: descInput.value,
+      });
+    }
+  });
+    const basicRoadmap = basicRoadmapInput.value;
+  const roadmaps = roadmapInputs.map(input => input.value);
+  const info = infoInput.value;
 
   const relatedItemsByCategory = {};
   const relatedUpdates = {}; // Separate updates for relationships
@@ -178,68 +263,64 @@ function saveItemDetails() {
         window.categoriesData[selectedCategoryId]?.items[selectedItemId]
           ?.name || "";
 
-      if (categoryName && selectedItemName) {
-        if (!relatedItemsByCategory[categoryName]) {
-          relatedItemsByCategory[categoryName] = {};
-        }
-        relatedItemsByCategory[categoryName][selectedItemId] = selectedItemName;
+          if (categoryName && selectedItemName) {
+            if (!relatedItemsByCategory[categoryName]) {
+              relatedItemsByCategory[categoryName] = {};
+            }
+            relatedItemsByCategory[categoryName][selectedItemId] = selectedItemName;
+    
+            // Add relationship updates separately
+            relatedUpdates[
+              `categories/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${selectedItemId}`
+            ] = selectedItemName;
+            relatedUpdates[
+              `categories/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
+            ] = name;
+          }
+        });
+    
+        // Remove unchecked relationships
+        const previouslySelected =
+          window.categoriesData[selectedCategoryId]?.items || {};
+        Object.keys(previouslySelected).forEach((relatedItemId) => {
+          if (!selectedItems.some((checkbox) => checkbox.value === relatedItemId)) {
+            relatedUpdates[
+              `categories/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${relatedItemId}`
+            ] = null;
+            relatedUpdates[
+              `categories/${selectedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
+            ] = null;
+          }
+        });
+      });
 
-        // Add relationship updates separately
-        relatedUpdates[
-          `categories/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${selectedItemId}`
-        ] = selectedItemName;
-        relatedUpdates[
-          `categories/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
-        ] = name;
-      }
-    });
-
-    // Remove unchecked relationships
-    const previouslySelected =
-      window.categoriesData[selectedCategoryId]?.items || {};
-    Object.keys(previouslySelected).forEach((relatedItemId) => {
-      if (!selectedItems.some((checkbox) => checkbox.value === relatedItemId)) {
-        relatedUpdates[
-          `categories/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${relatedItemId}`
-        ] = null;
-        relatedUpdates[
-          `categories/${selectedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
-        ] = null;
-      }
-    });
-  });
-
-  const updatedItem = {
+  // Prepare the updated data object
+  const updatedData = {
     name,
     logo,
-    uses,
+    uses: uses.length > 0 ? uses : [], // Ensure it remains an array
     basicRoadmap,
     roadmaps,
     info,
+    relatedItemsByCategory,
   };
-
-  // STEP 1: Update item details first
-  update(ref(database, `categories/${categoryId}/items/${itemId}`), updatedItem)
-    .then(() => {
-      console.log("Item details updated successfully!");
-
-      // STEP 2: Now update related items separately
-      return update(ref(database), relatedUpdates);
-    })
-    .then(() => {
-      alert("Item relationships updated successfully!");
-    })
-    .catch((error) => {
-      console.error("Error updating item:", error);
-    });
+  
+  // Update the item in Firebase
+  update(itemRef, updatedData).then(() => {
+    update(ref(database), relatedUpdates); // Update relationships in all affected categories
+    alert("Item details saved successfully!");
+    window.location.reload();
+  }).catch((error) => {
+    console.error("Error saving item details:", error);
+  });
 }
 
-// Helper function for editable fields
+// Helper function to generate field views
 function generateFieldView(label, field, value) {
   return `
     <div class="field-group">
       <label for="input-${field}">${label}</label>
-      <input type="text" id="input-${field}" value="${value}" disabled />
+      <input type="text" id="input-${field}" value="${value || ""}" disabled />
       <button class="edit-btn" data-field="${field}">Edit</button>
     </div>
   `;

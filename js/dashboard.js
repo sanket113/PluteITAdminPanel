@@ -1,5 +1,8 @@
 import { database } from "../js/firebase-config.js";
-import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import {
+  ref,
+  onValue,
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { checkAuthStatus, logout } from "../js/session.js";
 
 // DOM Elements
