@@ -4,7 +4,7 @@ import {
   onValue,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { checkAuthStatus, logout } from "../js/session.js";
-
+import { testDomainUrl } from "../js/constant.js";
 // DOM Elements
 const categoryGrid = document.getElementById("category-grid");
 const adminName = document.getElementById("admin-name");
@@ -22,7 +22,7 @@ logoutButton.addEventListener("click", () => {
 });
 
 // Display existing categories in real-time
-const categoriesRef = ref(database, "categories");
+const categoriesRef = ref(database, testDomainUrl);
 onValue(categoriesRef, (snapshot) => {
   categoryGrid.innerHTML = ""; // Clear the grid before updating
 

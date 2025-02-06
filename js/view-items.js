@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { database } from "../js/firebase-config.js";
 import { checkAuthStatus, logout } from "../js/session.js";
-
+import { testDomainUrl } from "../js/constant.js";
 // DOM Elements
 const categoryTitle = document.getElementById("category-title");
 const itemGrid = document.getElementById("item-grid");
@@ -38,7 +38,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const categoryId = urlParams.get("categoryId");
 
 // Fetch and display all categories (excluding current category)
-const categoriesRef = ref(database, "categories");
+const categoriesRef = ref(database, testDomainUrl);
 let categories = {};
 
 onValue(categoriesRef, (snapshot) => {
@@ -90,7 +90,7 @@ onValue(categoriesRef, (snapshot) => {
 });
 
 // Fetch and display items for the current category
-const categoryRef = ref(database, `categories/${categoryId}`);
+const categoryRef = ref(database, `${testDomainUrl}/${categoryId}`);
 onValue(categoryRef, (snapshot) => {
   const category = snapshot.val();
   if (category) {
@@ -178,7 +178,7 @@ addItemForm.addEventListener("submit", async (e) => {
   const description = document.getElementById("item-description").value;
   const image = document.getElementById("item-image").value;
   const basicRoadmap = document.getElementById("item-basic-roadmap").value;
-  const shortDescription = document.getElementById("short-description");
+  const shortDescription = document.getElementById("short-description").value;
   const roadmaps = [];
   const all_about_img=document.getElementById("all=about-img").value;
   for (let i = 1; i <= 4; i++) {
@@ -238,13 +238,13 @@ addItemForm.addEventListener("submit", async (e) => {
 
 
   try {
-    const itemsRef = ref(database, `categories/${categoryId}/items`);
+    const itemsRef = ref(database, `${testDomainUrl}/${categoryId}/items`);
 
     const newItemRef = push(itemsRef);
     const newItem = {
       name: title,
       info: description,
-      shortinfo: shortDescription,
+      shortDescription: shortDescription,
       logo: image,
       uses: uses, // Now stores uses as objects with title and description
       basicRoadmap: basicRoadmap,
@@ -264,7 +264,7 @@ addItemForm.addEventListener("submit", async (e) => {
     } of relatedItemsToUpdate) {
       const relatedItemRef = ref(
         database,
-        `categories/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${categories[categoryId]?.title}`
+        `${testDomainUrl}/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${categories[categoryId]?.title}`
       );
 
       // Fetch existing relations to avoid duplicates
@@ -290,7 +290,7 @@ async function deleteItem(itemId) {
   if (!confirm("Are you sure you want to delete this item?")) return;
 
   try {
-    const itemRef = ref(database, `categories/${categoryId}/items/${itemId}`);
+    const itemRef = ref(database, `${testDomainUrl}/${categoryId}/items/${itemId}`);
     const itemSnapshot = await get(itemRef);
 
     if (!itemSnapshot.exists()) {
@@ -314,7 +314,7 @@ async function deleteItem(itemId) {
           if (relatedCategoryId) {
             const relatedItemRef = ref(
               database,
-              `categories/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${categories[categoryId]?.title}`
+              `${testDomainUrl}/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${categories[categoryId]?.title}`
             );
 
             // Fetch the related item's category reference
@@ -346,7 +346,7 @@ async function deleteItem(itemId) {
             // Step 2: Check if the subcategory (e.g., "Languages") is empty and remove it
             const categoryRef = ref(
               database,
-              `categories/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory`
+              `${testDomainUrl}/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory`
             );
             const categorySnapshot = await get(categoryRef);
 

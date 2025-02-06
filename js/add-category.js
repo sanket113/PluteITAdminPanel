@@ -8,6 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { checkAuthStatus, logout } from "../js/session.js";
 import { database } from "../js/firebase-config.js";
+import { testDomainUrl } from "../js/constant.js";
 
 // Check if user is authenticated
 checkAuthStatus((user) => {
@@ -63,7 +64,7 @@ categoryForm.addEventListener("submit", (e) => {
   };
 
   // Reference to the "categories" node in the database
-  const categoriesRef = ref(database, "categories");
+  const categoriesRef = ref(database, testDomainUrl);
 
   // Add the new category to the database
   push(categoriesRef, newCategory)
@@ -78,7 +79,7 @@ categoryForm.addEventListener("submit", (e) => {
 });
 
 // Display existing categories in real-time
-const categoriesRef = ref(database, "categories");
+const categoriesRef = ref(database, testDomainUrl);
 onValue(categoriesRef, (snapshot) => {
   categoryGrid.innerHTML = ""; // Clear the grid before updating
 
@@ -148,7 +149,7 @@ onValue(categoriesRef, (snapshot) => {
       );
       if (confirmDelete) {
         // Remove the category from Firebase
-        const categoryRef = ref(database, `categories/${categoryId}`);
+        const categoryRef = ref(database, `${testDomainUrl}/${categoryId}`);
         remove(categoryRef)
           .then(() => {
             alert(`Category "${category.title}" deleted successfully.`);
@@ -187,7 +188,7 @@ editCategoryForm.addEventListener("submit", (e) => {
   }
 
   // Get existing category data from Firebase
-  const categoryRef = ref(database, `categories/${currentCategoryId}`);
+  const categoryRef = ref(database, `${testDomainUrl}/${currentCategoryId}`);
 
   onValue(
     categoryRef,

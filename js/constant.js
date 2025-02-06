@@ -1,0 +1,1 @@
+export const testDomainUrl="categories_test";

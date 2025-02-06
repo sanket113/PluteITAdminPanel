@@ -5,7 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { database } from "../js/firebase-config.js";
 import { checkAuthStatus, logout } from "../js/session.js";
-
+import { testDomainUrl } from "../js/constant.js";
 // Extract categoryId and itemId from the URL
 const urlParams = new URLSearchParams(window.location.search);
 const categoryId = urlParams.get("categoryId");
@@ -27,7 +27,7 @@ checkAuthStatus((user) => {
 logoutButton.addEventListener("click", logout);
 
 // Fetch item details
-const itemRef = ref(database, `categories/${categoryId}/items/${itemId}`);
+const itemRef = ref(database, `${testDomainUrl}/${categoryId}/items/${itemId}`);
 onValue(itemRef, (snapshot) => {
   const item = snapshot.val();
 
@@ -38,6 +38,9 @@ onValue(itemRef, (snapshot) => {
         <h2>Item Details</h2>
         ${generateFieldView("Name", "name", item.name)}
         ${generateFieldView("Logo URL", "logo", item.logo)}
+        ${generateFieldView("Short Description", "shortDesc", item.shortDescription || "")}
+        ${generateFieldView("Long Description", "info", item.info)}
+
         ${generateUsesFieldView(item.uses || [])}
         ${generateFieldView("Basic Roadmap URL", "basicRoadmap", item.basicRoadmap)}
         ${generateFieldView("Roadmap URL 1", "roadmap1", item.roadmaps?.[0] || "")}
@@ -150,7 +153,7 @@ function removeUsesItem(index) {
 
 // Fetch categories and display related item checkboxes
 function fetchCategoriesForRelationship(currentRelatedItems) {
-  const categoriesRef = ref(database, "categories");
+  const categoriesRef = ref(database, testDomainUrl);
 
   onValue(categoriesRef, (snapshot) => {
     const categories = snapshot.val() || {};
@@ -245,7 +248,9 @@ function saveItemDetails() {
     const basicRoadmap = basicRoadmapInput.value;
   const roadmaps = roadmapInputs.map(input => input.value);
   const info = infoInput.value;
-
+  const shortDescInput = document.getElementById("input-shortDesc");
+  const shortDescription = shortDescInput ? shortDescInput.value : "";
+  
   const relatedItemsByCategory = {};
   const relatedUpdates = {}; // Separate updates for relationships
 
@@ -271,10 +276,10 @@ function saveItemDetails() {
     
             // Add relationship updates separately
             relatedUpdates[
-              `categories/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${selectedItemId}`
+              `${testDomainUrl}/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${selectedItemId}`
             ] = selectedItemName;
             relatedUpdates[
-              `categories/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
+              `${testDomainUrl}/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
             ] = name;
           }
         });
@@ -285,10 +290,10 @@ function saveItemDetails() {
         Object.keys(previouslySelected).forEach((relatedItemId) => {
           if (!selectedItems.some((checkbox) => checkbox.value === relatedItemId)) {
             relatedUpdates[
-              `categories/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${relatedItemId}`
+              `${testDomainUrl}/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${relatedItemId}`
             ] = null;
             relatedUpdates[
-              `categories/${selectedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
+              `${testDomainUrl}/${selectedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
             ] = null;
           }
         });
@@ -298,6 +303,7 @@ function saveItemDetails() {
   const updatedData = {
     name,
     logo,
+    shortDescription,
     uses: uses.length > 0 ? uses : [], // Ensure it remains an array
     basicRoadmap,
     roadmaps,

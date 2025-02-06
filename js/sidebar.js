@@ -3,10 +3,11 @@ import {
   onValue,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { database } from "../js/firebase-config.js";
+import { testDomainUrl } from "../js/constant.js";
 
 // Function to load categories dynamically
 function loadCategories() {
-  const dbRef = ref(database, "categories");
+  const dbRef = ref(database, testDomainUrl);
   const menu = document.getElementById("sidebar-menu");
 
   onValue(dbRef, (snapshot) => {
