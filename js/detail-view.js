@@ -47,7 +47,7 @@ onValue(itemRef, (snapshot) => {
         ${generateFieldView("Roadmap URL 2", "roadmap2", item.roadmaps?.[1] || "")}
         ${generateFieldView("Roadmap URL 3", "roadmap3", item.roadmaps?.[2] || "")}
         ${generateFieldView("Roadmap URL 4", "roadmap4", item.roadmaps?.[3] || "")}
-        ${generateFieldView("Information", "info", item.info)}
+        
       </div>
     `;
 
@@ -185,11 +185,12 @@ function fetchCategoriesForRelationship(currentRelatedItems) {
               checkbox.classList.add("category-checkbox");
 
               if (
-                currentRelatedItems[category.title] &&
-                currentRelatedItems[category.title][relatedItemId]
+                currentRelatedItems[catId] &&
+                currentRelatedItems[catId][relatedItemId]
               ) {
                 checkbox.checked = true;
               }
+              
 
               const label = document.createElement("label");
               label.htmlFor = `checkbox-${relatedItemId}`;
@@ -269,18 +270,20 @@ function saveItemDetails() {
           ?.name || "";
 
           if (categoryName && selectedItemName) {
-            if (!relatedItemsByCategory[categoryName]) {
-              relatedItemsByCategory[categoryName] = {};
+            if (!relatedItemsByCategory[selectedCategoryId]) {
+              relatedItemsByCategory[selectedCategoryId] = {};
             }
-            relatedItemsByCategory[categoryName][selectedItemId] = selectedItemName;
+            relatedItemsByCategory[selectedCategoryId][selectedItemId] = selectedItemName;
     
             // Add relationship updates separately
             relatedUpdates[
-              `${testDomainUrl}/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${selectedItemId}`
+              `${testDomainUrl}/${categoryId}/items/${itemId}/relatedItemsByCategory/${selectedCategoryId}/${selectedItemId}`
             ] = selectedItemName;
+    
             relatedUpdates[
-              `${testDomainUrl}/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
+              `${testDomainUrl}/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${categoryId}/${itemId}`
             ] = name;
+          
           }
         });
     
@@ -290,10 +293,10 @@ function saveItemDetails() {
         Object.keys(previouslySelected).forEach((relatedItemId) => {
           if (!selectedItems.some((checkbox) => checkbox.value === relatedItemId)) {
             relatedUpdates[
-              `${testDomainUrl}/${categoryId}/items/${itemId}/relatedItemsByCategory/${categoryName}/${relatedItemId}`
+              `${testDomainUrl}/${categoryId}/items/${itemId}/relatedItemsByCategory/${selectedCategoryId}/${relatedItemId}`
             ] = null;
             relatedUpdates[
-              `${testDomainUrl}/${selectedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${window.categoriesData[categoryId].title}/${itemId}`
+              `${testDomainUrl}/${selectedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${categoryId}/${itemId}`
             ] = null;
           }
         });

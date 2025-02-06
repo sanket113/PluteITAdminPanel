@@ -203,36 +203,35 @@ addItemForm.addEventListener("submit", async (e) => {
 
   // Collect selected related items
   const relatedItemsByCategory = {};
-  const relatedItemsToUpdate = [];
+const relatedItemsToUpdate = [];
 
-  document.querySelectorAll(".category-container").forEach((categoryDiv) => {
-    const selectedCategoryId = categoryDiv.dataset.categoryId;
-    const categoryName = categories[selectedCategoryId]?.title || "";
+document.querySelectorAll(".category-container").forEach((categoryDiv) => {
+  const selectedCategoryId = categoryDiv.dataset.categoryId; // Use category UID instead of title
 
-    const selectedItems = Array.from(
-      categoryDiv.querySelectorAll(".category-checkbox:checked")
-    );
+  const selectedItems = Array.from(
+    categoryDiv.querySelectorAll(".category-checkbox:checked")
+  );
 
-    selectedItems.forEach((checkbox) => {
-      const selectedItemId = checkbox.value;
-      const selectedItemName =
-        categories[selectedCategoryId]?.items[selectedItemId]?.name || "";
+  selectedItems.forEach((checkbox) => {
+    const selectedItemId = checkbox.value;
+    const selectedItemName =
+      categories[selectedCategoryId]?.items[selectedItemId]?.name || "";
 
-      if (categoryName && selectedItemName) {
-        if (!relatedItemsByCategory[categoryName]) {
-          relatedItemsByCategory[categoryName] = {};
-        }
-        relatedItemsByCategory[categoryName][selectedItemId] = selectedItemName;
-
-        // Store related item details for updating the reverse relation
-        relatedItemsToUpdate.push({
-          selectedCategoryId,
-          selectedItemId,
-          selectedItemName,
-        });
+    if (selectedItemId && selectedItemName) {
+      if (!relatedItemsByCategory[selectedCategoryId]) {
+        relatedItemsByCategory[selectedCategoryId] = {};
       }
-    });
+      relatedItemsByCategory[selectedCategoryId][selectedItemId] = selectedItemName;
+
+      // Store related item details for updating the reverse relation
+      relatedItemsToUpdate.push({
+        selectedCategoryId,
+        selectedItemId,
+        selectedItemName,
+      });
+    }
   });
+});
 
   
 
@@ -257,14 +256,10 @@ addItemForm.addEventListener("submit", async (e) => {
     const newItemId = newItemRef.key; // Get UID of the newly added item
 
     // Add reverse relations in related items
-    for (const {
-      selectedCategoryId,
-      selectedItemId,
-      selectedItemName,
-    } of relatedItemsToUpdate) {
+    for (const { selectedCategoryId, selectedItemId, selectedItemName } of relatedItemsToUpdate) {
       const relatedItemRef = ref(
         database,
-        `${testDomainUrl}/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${categories[categoryId]?.title}`
+        `${testDomainUrl}/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${categoryId}`
       );
 
       // Fetch existing relations to avoid duplicates
