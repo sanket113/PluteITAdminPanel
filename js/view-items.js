@@ -297,86 +297,44 @@ async function deleteItem(itemId) {
 
     // Step 1: Remove references from related items
     if (itemData.relatedItemsByCategory) {
-      for (const [relatedCategoryName, relatedItems] of Object.entries(
-        itemData.relatedItemsByCategory
-      )) {
-        for (const [relatedItemId] of Object.entries(relatedItems)) {
-          // Find the related category ID
-          const relatedCategoryId = Object.keys(categories).find(
-            (key) => categories[key].title === relatedCategoryName
+      for (const [relatedCategoryId, relatedItems] of Object.entries(itemData.relatedItemsByCategory)) {
+        for (const relatedItemId of Object.keys(relatedItems)) {
+          // Reference to the related item's category
+          const relatedItemRef = ref(
+            database,
+            `${testDomainUrl}/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${categoryId}`
           );
 
-          if (relatedCategoryId) {
-            const relatedItemRef = ref(
-              database,
-              `${testDomainUrl}/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${categories[categoryId]?.title}`
-            );
+          // Fetch the related item reference
+          const relatedItemSnapshot = await get(relatedItemRef);
+          if (relatedItemSnapshot.exists()) {
+            let relatedItemData = relatedItemSnapshot.val();
 
-            // Fetch the related item's category reference
-            const relatedItemSnapshot = await get(relatedItemRef);
-            if (relatedItemSnapshot.exists()) {
-              let relatedItemData = relatedItemSnapshot.val();
+            // Remove the deleted item's reference
+            delete relatedItemData[itemId];
 
-              // Collect keys to be deleted
-              const itemsToDelete = [];
-
-              for (const relatedItem in relatedItemData) {
-                if (relatedItem === itemId) {
-                  itemsToDelete.push(relatedItem);
-                }
-              }
-
-              // Delete marked items
-              itemsToDelete.forEach((item) => {
-                relatedItemData[item] = null;
-              });
-
-              if (Object.keys(relatedItemData).length === 0) {
-                await remove(relatedItemRef);
-              } else {
-                await update(relatedItemRef, relatedItemData);
-              }
-            }
-
-            // Step 2: Check if the subcategory (e.g., "Languages") is empty and remove it
-            const categoryRef = ref(
-              database,
-              `${testDomainUrl}/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory`
-            );
-            const categorySnapshot = await get(categoryRef);
-
-            if (categorySnapshot.exists()) {
-              let relatedCategories = categorySnapshot.val();
-
-              // Check if "Languages" (subcategory) is empty
-              if (relatedCategories[relatedCategoryName]) {
-                if (
-                  Object.keys(relatedCategories[relatedCategoryName]).length ===
-                  0
-                ) {
-                  delete relatedCategories[relatedCategoryName];
-
-                  // If `relatedItemsByCategory` itself is empty, remove it entirely
-                  if (Object.keys(relatedCategories).length === 0) {
-                    await remove(categoryRef);
-                  } else {
-                    await update(categoryRef, relatedCategories);
-                  }
-                }
-              }
+            // If no more related items exist, remove the node entirely
+            if (Object.keys(relatedItemData).length === 0) {
+              await remove(relatedItemRef);
+            } else {
+              await set(relatedItemRef, relatedItemData);
             }
           }
         }
       }
     }
 
-    // Step 3: Remove the item itself
+    // Step 2: Remove the item itself
     await remove(itemRef);
     alert("Item and its references deleted successfully!");
   } catch (error) {
     console.error("Error deleting item:", error);
   }
 }
+
+
+
+
 
 // Add new use case input fields
 addUseButton.addEventListener("click", () => {
