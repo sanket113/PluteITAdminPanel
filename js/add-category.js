@@ -54,14 +54,18 @@ categoryForm.addEventListener("submit", (e) => {
   const title = document.getElementById("category-title").value;
   const subtitle = document.getElementById("category-subtitle").value;
   const image = document.getElementById("category-image").value;
+  const Ui_type = document.getElementById("category-type").value;
 
   // Create a new category object
   const newCategory = {
     title,
     subtitle,
     image,
+    Ui_type,
     items: [], // Initialize with an empty items array
   };
+
+  console.log(newCategory);
 
   // Reference to the "categories" node in the database
   const categoriesRef = ref(database, testDomainUrl);
@@ -134,6 +138,7 @@ onValue(categoriesRef, (snapshot) => {
       document.getElementById("edit-category-subtitle").value =
         category.subtitle;
       document.getElementById("edit-category-image").value = category.image;
+      document.getElementById("edit-category-type").value = category.Ui_type;
 
       editCategoryModal.classList.remove("hidden"); // Show the edit modal
     });
@@ -200,6 +205,7 @@ editCategoryForm.addEventListener("submit", (e) => {
         "edit-category-subtitle"
       ).value;
       const updatedImage = document.getElementById("edit-category-image").value;
+      const updatedType = document.getElementById("edit-category-type").value;
 
       let updates = {};
       let updateMessages = [];
@@ -216,6 +222,10 @@ editCategoryForm.addEventListener("submit", (e) => {
       if (updatedImage !== existingCategory.image) {
         updates.image = updatedImage;
         updateMessages.push("Image updated successfully.");
+      }
+      if (updatedType !== existingCategory.Ui_type) {
+        updates.Ui_type = updatedType;
+        updateMessages.push("UI Type updated successfully.");
       }
 
       if (Object.keys(updates).length === 0) {

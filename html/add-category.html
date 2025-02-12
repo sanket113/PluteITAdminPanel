@@ -5,6 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Categories</title>
     <link rel="stylesheet" href="../css/style.css" />
+    <style>
+      /* Dropdown Styling */
+      select {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        font-size: 16px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+      }
+
+      /* Hover effect */
+      select:hover {
+        border-color: #007bff;
+      }
+
+      /* Focus effect */
+      select:focus {
+        outline: none;
+        border-color: #0056b3;
+        box-shadow: 0 0 5px rgba(0, 91, 187, 0.5);
+      }
+
+      /* Dropdown options */
+      select option {
+        padding: 10px;
+        font-size: 16px;
+        background: #fff;
+      }
+    </style>
   </head>
   <body>
     <div class="dashboard-container">
@@ -54,6 +87,14 @@
             placeholder="Image URL"
             required
           />
+
+          <label for="category-type">UI Type:</label>
+          <select id="category-type" required>
+            <option value="LIST">LIST</option>
+            <option value="GRID">GRID</option>
+            <option value="POST">POST</option>
+          </select>
+
           <button type="submit">Add Category</button>
         </form>
       </div>
@@ -71,6 +112,13 @@
 
           <label for="edit-category-image">Image URL:</label>
           <input type="text" id="edit-category-image" required />
+
+          <label for="edit-category-type">Category Type:</label>
+          <select id="edit-category-type" required>
+            <option value="LIST">LIST</option>
+            <option value="GRID">GRID</option>
+            <option value="POST">POST</option>
+          </select>
 
           <button type="submit">Save Changes</button>
         </form>

@@ -5,14 +5,14 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDua-qUZVe8uMBxOFOFGdQGJHgfOuqUYdc",
-  authDomain: "pluteit-c9187.firebaseapp.com",
-  databaseURL: "https://pluteit-c9187-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "pluteit-c9187",
-  storageBucket: "pluteit-c9187.firebasestorage.app",
-  messagingSenderId: "417757616870",
-  appId: "1:417757616870:web:f3019ee26767a74a89f927",
-  measurementId: "G-V8FPD7LP9Y"
+  apiKey: "AIzaSyAjfIZy1SiNt0cfdvf2gxdMZIsxYfiy_zc",
+  authDomain: "pluteit-205c0.firebaseapp.com",
+  databaseURL: "https://pluteit-205c0-default-rtdb.firebaseio.com",
+  projectId: "pluteit-205c0",
+  storageBucket: "pluteit-205c0.firebasestorage.app",
+  messagingSenderId: "889756982925",
+  appId: "1:889756982925:web:1beca65e3799c94a428cc4",
+  measurementId: "G-2B4WYN70LT"
 };
 
 const app = initializeApp(firebaseConfig);

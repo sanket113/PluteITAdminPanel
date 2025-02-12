@@ -49,7 +49,7 @@ input[type="password"] {
 /* General Button Styling */
 button {
 
-    width: 100%; 
+    width: 100%;
     max-width: 200px;
     padding: 12px;
     margin-top: 15px;
@@ -150,7 +150,7 @@ h2 {
     text-align: center;
     padding: 25px;
     font-size: 1000px;
-    margin-bottom: 70px; 
+    margin-bottom: 70px;
     color: #fff;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -232,7 +232,7 @@ h2 {
     transition: all 0.3s ease;
 }
 html, body {
-    
+
    margin: 0;
     padding: 0;
     width: 100%;
@@ -346,7 +346,7 @@ button {
     transition: all 0.3s ease-in-out;
     width: 100%;
     /* Adjust the width to your preference */
-   
+
 }
 
 button:hover {
