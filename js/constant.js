@@ -1,1 +1,1 @@
-export const testDomainUrl="categories_test";
+export const testDomainUrl="categories";

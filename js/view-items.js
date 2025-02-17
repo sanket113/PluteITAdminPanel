@@ -5,7 +5,7 @@ import {
   push,
   update,
   remove,
-  set
+  set,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { database } from "../js/firebase-config.js";
 import { checkAuthStatus, logout } from "../js/session.js";
@@ -41,64 +41,82 @@ const categoryId = urlParams.get("categoryId");
 const categoriesRef = ref(database, testDomainUrl);
 let categories = {};
 
-onValue(categoriesRef, (snapshot) => {
-  categories = snapshot.val() || {};
-  categorySelectorsContainer.innerHTML = ""; // Clear previous content
+onValue(categoriesRef, (categorySnapshot) => {
+  const categories = categorySnapshot.val() || {};
+  categorySelectorsContainer.innerHTML = ""; // Clear category selectors only once
 
-  Object.entries(categories).forEach(([catId, category]) => {
-    if (catId !== categoryId) {
-      // Create category container
-      const categoryContainer = document.createElement("div");
-      categoryContainer.classList.add("category-container");
-      categoryContainer.dataset.categoryId = catId;
+  onValue(
+    itemsRef,
+    (itemsSnapshot) => {
+      const items = itemsSnapshot.val() || {};
 
-      // Category title
-      const categoryTitle = document.createElement("h4");
-      categoryTitle.textContent = `${category.title}`;
-      categoryContainer.appendChild(categoryTitle);
+      categorySelectorsContainer.innerHTML = ""; // Clear existing categories before re-rendering
 
-      // Checkbox group
-      const checkboxGroup = document.createElement("div");
-      checkboxGroup.classList.add("checkbox-group");
+      Object.entries(categories).forEach(([catId, category]) => {
+        if (catId !== categoryId) {
+          // Exclude current category
+          const categoryContainer = document.createElement("div");
+          categoryContainer.classList.add("category-container");
+          categoryContainer.dataset.categoryId = catId;
 
-      // Populate checkboxes with items
-      if (category.items) {
-        Object.entries(category.items).forEach(([itemId, item]) => {
-          const checkboxWrapper = document.createElement("div");
-          checkboxWrapper.classList.add("checkbox-wrapper");
+          // Category title
+          const categoryTitle = document.createElement("h4");
+          categoryTitle.textContent = `${category.title}`;
+          categoryContainer.appendChild(categoryTitle);
 
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.value = itemId;
-          checkbox.id = `checkbox-${itemId}`;
-          checkbox.classList.add("category-checkbox");
+          // Checkbox group
+          const checkboxGroup = document.createElement("div");
+          checkboxGroup.classList.add("checkbox-group");
 
-          const label = document.createElement("label");
-          label.htmlFor = `checkbox-${itemId}`;
-          label.textContent = item.name;
+          // Filter items that belong to this category
+          Object.entries(items).forEach(([itemId, item]) => {
+            if (item.categoryUid === catId) {
+              const checkboxWrapper = document.createElement("div");
+              checkboxWrapper.classList.add("checkbox-wrapper");
 
-          checkboxWrapper.appendChild(checkbox);
-          checkboxWrapper.appendChild(label);
-          checkboxGroup.appendChild(checkboxWrapper);
-        });
-      }
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.value = itemId;
+              checkbox.id = `checkbox-${itemId}`;
+              checkbox.classList.add("category-checkbox");
+              checkbox.setAttribute("data-item-name", item.name);
 
-      categoryContainer.appendChild(checkboxGroup);
-      categorySelectorsContainer.appendChild(categoryContainer);
-    }
-  });
+              const label = document.createElement("label");
+              label.htmlFor = `checkbox-${itemId}`;
+              label.textContent = item.name;
+
+              checkboxWrapper.appendChild(checkbox);
+              checkboxWrapper.appendChild(label);
+              checkboxGroup.appendChild(checkboxWrapper);
+            }
+          });
+
+          categoryContainer.appendChild(checkboxGroup);
+          categorySelectorsContainer.appendChild(categoryContainer);
+        }
+      });
+    },
+    { onlyOnce: true }
+  ); // Ensure items listener runs only once inside category loop
 });
 
-// Fetch and display items for the current category
-const categoryRef = ref(database, `${testDomainUrl}/${categoryId}`);
-onValue(categoryRef, (snapshot) => {
-  const category = snapshot.val();
-  if (category) {
-    categoryTitle.textContent = `Items in "${category.title}"`;
-    itemGrid.innerHTML = ""; // Clear the grid before updating
+// Reference to all items in the database
+const itemsRef = ref(database, "items");
 
-    if (category.items && typeof category.items === "object") {
-      Object.entries(category.items).forEach(([itemId, item]) => {
+onValue(itemsRef, (snapshot) => {
+  itemGrid.innerHTML = ""; // Clear existing items
+
+  if (snapshot.exists()) {
+    const allItems = snapshot.val();
+    const categoryItems = Object.entries(allItems).filter(
+      ([_, item]) => item.categoryUid === categoryId
+    );
+
+    if (categoryItems.length > 0) {
+      categoryTitle.textContent = `Items in "${categoryTitle}"`;
+
+      categoryItems.forEach(([itemId, item]) => {
+        // Create item card
         const card = document.createElement("div");
         card.classList.add("card");
 
@@ -125,11 +143,9 @@ onValue(categoryRef, (snapshot) => {
         const viewButton = document.createElement("button");
         viewButton.textContent = "View";
         viewButton.classList.add("btn", "view-btn");
-        viewButton.addEventListener(
-          "click",
-          () =>
-            (window.location.href = `detail-view.html?categoryId=${categoryId}&itemId=${itemId}`)
-        );
+        viewButton.addEventListener("click", () => {
+          window.location.href = `detail-view.html?categoryId=${categoryId}&itemId=${itemId}`;
+        });
 
         // Delete Button
         const deleteButton = document.createElement("button");
@@ -152,7 +168,8 @@ onValue(categoryRef, (snapshot) => {
       itemGrid.innerHTML = "<p>No items available in this category.</p>";
     }
   } else {
-    console.error("Category not found or no data available.");
+    console.error("No items found.");
+    itemGrid.innerHTML = "<p>No items available.</p>";
   }
 });
 
@@ -180,7 +197,7 @@ addItemForm.addEventListener("submit", async (e) => {
   const basicRoadmap = document.getElementById("item-basic-roadmap").value;
   const shortDescription = document.getElementById("short-description").value;
   const roadmaps = [];
-  const all_about_img=document.getElementById("all=about-img").value;
+  const all_about_img = document.getElementById("all=about-img").value;
   for (let i = 1; i <= 4; i++) {
     const roadmap = document.getElementById(`item-roadmap${i}`).value;
     if (roadmap) {
@@ -203,44 +220,38 @@ addItemForm.addEventListener("submit", async (e) => {
 
   // Collect selected related items
   const relatedItemsByCategory = {};
-const relatedItemsToUpdate = [];
+  const relatedItemsToUpdate = [];
 
-document.querySelectorAll(".category-container").forEach((categoryDiv) => {
-  const selectedCategoryId = categoryDiv.dataset.categoryId; // Use category UID instead of title
+  document.querySelectorAll(".category-container").forEach((categoryDiv) => {
+    const selectedCategoryId = categoryDiv.dataset.categoryId; // Use category UID instead of title
 
-  const selectedItems = Array.from(
-    categoryDiv.querySelectorAll(".category-checkbox:checked")
-  );
+    const selectedItems = Array.from(
+      categoryDiv.querySelectorAll(".category-checkbox:checked")
+    );
 
-  selectedItems.forEach((checkbox) => {
-    const selectedItemId = checkbox.value;
-    const selectedItemName =
-      categories[selectedCategoryId]?.items[selectedItemId]?.name || "";
+    selectedItems.forEach((checkbox) => {
+      const selectedItemId = checkbox.value;
+      const itemName = checkbox.dataset.itemName;
+      // || checkbox.getAttribute("data-item-name")
 
-    if (selectedItemId && selectedItemName) {
       if (!relatedItemsByCategory[selectedCategoryId]) {
         relatedItemsByCategory[selectedCategoryId] = {};
       }
-      relatedItemsByCategory[selectedCategoryId][selectedItemId] = selectedItemName;
 
-      // Store related item details for updating the reverse relation
+      relatedItemsByCategory[selectedCategoryId][selectedItemId] = itemName; // Store as true
       relatedItemsToUpdate.push({
         selectedCategoryId,
         selectedItemId,
-        selectedItemName,
+        itemName,
       });
-    }
+    });
   });
-});
-
-  
-
 
   try {
-    const itemsRef = ref(database, `${testDomainUrl}/${categoryId}/items`);
+    const newItemRef = push(ref(database, "items")); // Create a new item node
+    const newItemId = newItemRef.key;
 
-    const newItemRef = push(itemsRef);
-    const newItem = {
+    const newItemData = {
       name: title,
       info: description,
       shortDescription: shortDescription,
@@ -248,27 +259,41 @@ document.querySelectorAll(".category-container").forEach((categoryDiv) => {
       uses: uses, // Now stores uses as objects with title and description
       basicRoadmap: basicRoadmap,
       roadmaps: roadmaps,
-      allAbout:all_about_img,
+      allAbout: all_about_img,
       relatedItemsByCategory: relatedItemsByCategory,
-      uid:""+newItemRef.key
+      uid: "" + newItemRef.key,
+      categoryUid: categoryId,
     };
-    await set(newItemRef,newItem);
-    const newItemId = newItemRef.key; // Get UID of the newly added item
+    await set(newItemRef, newItemData); // Store new item in "items" collection
 
+    // Append new item ID to the category’s "itemIds" list
+    /*
+    const categoryItemIdsRef = ref(database, `${testDomainUrl}/${categoryId}/itemIds`);
+    const categorySnapshot = await get(categoryItemIdsRef);
+    const currentItemIds = categorySnapshot.exists() ? categorySnapshot.val() : [];
+*/
+    //  await set(categoryItemIdsRef, [...currentItemIds, newItemId]); // Update category itemIds
     // Add reverse relations in related items
-    for (const { selectedCategoryId, selectedItemId, selectedItemName } of relatedItemsToUpdate) {
+    for (const { selectedCategoryId, selectedItemId } of relatedItemsToUpdate) {
       const relatedItemRef = ref(
         database,
-        `${testDomainUrl}/${selectedCategoryId}/items/${selectedItemId}/relatedItemsByCategory/${categoryId}`
+        `items/${selectedItemId}/relatedItemsByCategory/${categoryId}`
       );
 
-      // Fetch existing relations to avoid duplicates
+      // Fetch existing relations to avoid overwriting
       const snapshot = await get(relatedItemRef);
+      const existingRelations = snapshot.exists() ? snapshot.val() : {};
 
-      if (!snapshot.exists() || !snapshot.val()[newItemId]) {
-        // Add the reverse relation only if it's not already there
-        await update(relatedItemRef, { [newItemId]: title });
-      }
+      // Fetch the new item's name
+      const newItemSnapshot = await get(
+        ref(database, `items/${newItemId}/name`)
+      );
+      const newItemName = newItemSnapshot.exists()
+        ? newItemSnapshot.val()
+        : "Unknown";
+
+      existingRelations[newItemId] = newItemName; // Store UID as name instead of true
+      await set(relatedItemRef, existingRelations);
     }
 
     alert("Item added successfully!");
@@ -285,7 +310,7 @@ async function deleteItem(itemId) {
   if (!confirm("Are you sure you want to delete this item?")) return;
 
   try {
-    const itemRef = ref(database, `${testDomainUrl}/${categoryId}/items/${itemId}`);
+    const itemRef = ref(database, `items/${itemId}`);
     const itemSnapshot = await get(itemRef);
 
     if (!itemSnapshot.exists()) {
@@ -297,12 +322,14 @@ async function deleteItem(itemId) {
 
     // Step 1: Remove references from related items
     if (itemData.relatedItemsByCategory) {
-      for (const [relatedCategoryId, relatedItems] of Object.entries(itemData.relatedItemsByCategory)) {
+      for (const [relatedCategoryId, relatedItems] of Object.entries(
+        itemData.relatedItemsByCategory
+      )) {
         for (const relatedItemId of Object.keys(relatedItems)) {
           // Reference to the related item's category
           const relatedItemRef = ref(
             database,
-            `${testDomainUrl}/${relatedCategoryId}/items/${relatedItemId}/relatedItemsByCategory/${categoryId}`
+            `items/${relatedItemId}/relatedItemsByCategory/${categoryId}`
           );
 
           // Fetch the related item reference
@@ -331,10 +358,6 @@ async function deleteItem(itemId) {
     console.error("Error deleting item:", error);
   }
 }
-
-
-
-
 
 // Add new use case input fields
 addUseButton.addEventListener("click", () => {
