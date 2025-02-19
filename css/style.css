@@ -1,3 +1,4 @@
+
 /* Logo Styling */
 .logo-container {
     text-align: center;
@@ -33,12 +34,14 @@
 #login-form {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centers all form elements */
+    align-items: center;
+    /* Centers all form elements */
 }
 
 input[type="email"],
 input[type="password"] {
-    width: 90%; /* Ensures input fields take full width */
+    width: 90%;
+    /* Ensures input fields take full width */
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
@@ -63,7 +66,6 @@ button {
 
 
 
-
 input:focus,
 button:focus {
     outline: none;
@@ -73,33 +75,38 @@ button:focus {
 /* General styles */
 /* General Styling */
 body {
-    font-family: 'Poppins', sans-serif; /* Modern font for better readability */
+    font-family: 'Poppins', sans-serif;
+    /* Modern font for better readability */
     margin: 0;
     padding: 0;
-    background-color: #f4f7f9; /* Softer background color for better contrast */
+    background-color: #f4f7f9;
+    /* Softer background color for better contrast */
     color: #333;
 }
 
 /* Container Styling */
 .container {
     max-width: 1px;
-    margin: 40px auto; /* Increased margin for better spacing */
+    margin: 40px auto;
+    /* Increased margin for better spacing */
     padding: 30px;
     background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1); /* Enhanced shadow for a modern look */
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+    /* Enhanced shadow for a modern look */
     transition: all 0.3s ease-in-out;
 }
 
 .container:hover {
-    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15); /* Slight elevation on hover */
+    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
+    /* Slight elevation on hover */
 }
 
 /* Heading Styling */
 h1,
 h2 {
     text-align: center;
-    color: #222;
+    
     font-weight: 600;
     margin-bottom: 20px;
 }
@@ -107,12 +114,13 @@ h2 {
 /* Additional Styling for Better UI */
 h1 {
     font-size: 32px;
-    color: #007bff; /* Adding a primary color for better branding */
+    color: #333459;
+    /* Adding a primary color for better branding */
 }
 
 h2 {
     font-size: 26px;
-    color: #333;
+    
 }
 
 /* Responsive Design */
@@ -135,7 +143,8 @@ h2 {
 /* Sidebar Styling */
 .sidebar {
     width: 270px;
-    background-color: #0277bd; /* Slightly darker shade for a premium feel */
+    background-color: #333459;
+    /* Slightly darker shade for a premium feel */
     color: #fff;
     position: fixed;
     height: 100%;
@@ -158,6 +167,7 @@ h2 {
 
 /* Sidebar Menu */
 .sidebar-menu {
+    font-size: 1000px;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -174,7 +184,7 @@ h2 {
     text-decoration: none;
     color: #fff;
     display: block;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 500;
     transition: all 0.3s ease-in-out;
     display: flex;
@@ -183,12 +193,13 @@ h2 {
 
 /* Hover & Active Effects */
 .sidebar-menu li:hover {
-    background-color: #039be5;
-    box-shadow: inset 5px 0px 0px #fff; /* Adds a stylish left border on hover */
+    background-color: FFD32E;
+    box-shadow: inset 5px 0px 0px #fff;
+    /* Adds a stylish left border on hover */
 }
 
 .sidebar-menu li a:hover {
-    color: #e0f7fa;
+    color: FFD32E;
     padding-left: 30px;
 }
 
@@ -208,9 +219,11 @@ h2 {
     .sidebar {
         width: 220px;
     }
+
     .sidebar-header {
         font-size: 1.5rem;
     }
+
     .sidebar-menu li a {
         font-size: 14px;
     }
@@ -219,48 +232,68 @@ h2 {
 /* Dashboard Container */
 .dashboard-container {
     display: flex;
-    margin-top: 0; /* Ensure there's no space between the top and the header */
-    padding-top: 0; /* Ensure no padding at the top of the container */
+    margin: 0;
+    padding: 0;
+    top: 0;
+    /* Ensure no space from the top */
+    position: relative;
 }
 
+/* Main Content */
 .main-content {
+    margin: 0;
+    padding: 0;
     flex-grow: 1;
-    margin-left: 250px;
+    margin-left: 270px;
+    /* Adjust for the sidebar width */
     padding: 20px;
-    flex-grow: 1;
     background-color: #f9f9f9;
     transition: all 0.3s ease;
 }
-html, body {
 
-   margin: 0;
+/* HTML and Body Reset */
+html,
+body {
+    margin: 0;
     padding: 0;
     width: 100%;
 }
+
 /* Admin Header */
 .admin-header {
-    background-color: #0288d1;
+    background-color: #333459;
     color: white;
-    padding: 15px 20px;
+    padding: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    position: relative;
+    position: absolute;
     top: 0;
     left: 0;
-    margin: 0;
+    right: 0;
     z-index: 1000;
+    margin-left: 274px;
+    ;
+    margin-top: 10px;
+        margin-right: 25px;
+    /* Ensure no space above the header */
+    padding-top: 0px;
+    /* Remove top padding */
 }
 
-.admin-header  h1 {
+/* Admin Header Title */
+.admin-header h2 {
     font-size: 1.8rem;
     margin: 0;
-    justify-content: center; /* Center content horizontally */
+    justify-content: center;
+    /* Center content horizontally */
     align-items: center;
+    color: white;
 }
 
+/* Logout Button */
 .admin-header .logout-btn {
     background-color: #e74c3c;
     padding: 8px 12px;
@@ -288,13 +321,15 @@ html, body {
 form {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Increased spacing for better readability */
+    gap: 20px;
+    /* Increased spacing for better readability */
     padding: 60px;
     background: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     width: 70%;
-    max-width: 600px; /* Prevents the form from getting too wide on large screens */
+    max-width: 600px;
+    /* Prevents the form from getting too wide on large screens */
     margin: auto;
     transition: all 0.3s ease-in-out;
 }
@@ -303,9 +338,10 @@ form {
 input[type="text"],
 input[type="url"],
 textarea {
-    width: 100%; /* Full width within the form */
+    width: 100%;
+    /* Full width within the form */
     padding: 15px;
-    gap:10px;
+    gap: 10px;
     border: 2px solid #ccc;
     border-radius: 8px;
     font-size: 16px;
@@ -315,27 +351,28 @@ textarea {
 }
 
 
-
 /* Responsive Font Size */
 input[type="text"],
 input[type="url"],
 textarea {
-    width:92%;
-    font-size: clamp(16px, 1.2vw, 18px); /* Adapts to screen size */
+    width: 92%;
+    font-size: clamp(16px, 1.2vw, 18px);
+    /* Adapts to screen size */
 }
 
 /* Dynamic Textarea (Expands as user types) */
 textarea {
-    resize: vertical; /* Allows vertical resizing */
+    resize: vertical;
+    /* Allows vertical resizing */
     min-height: 100px;
     max-height: 300px;
     overflow-y: auto;
-    width:92%;
+    width: 92%;
 }
 
 /* Submit Button */
 button {
-    background-color: #0288d1;
+    background-color: #333459;
     color: white;
     padding: 12px;
     border: none;
@@ -350,7 +387,7 @@ button {
 }
 
 button:hover {
-    background-color: #026aa7;
+    background-color: #333459;
     transform: scale(1.05);
 }
 
@@ -393,7 +430,8 @@ button:hover {
     overflow: hidden;
     text-align: center;
     width: 100%;
-    height: 100%; /* Ensures card takes full height */
+    height: 100%;
+    /* Ensures card takes full height */
     padding: 7px;
 }
 
@@ -408,10 +446,12 @@ button:hover {
 /* Card Content */
 .card-content {
     padding: 15px;
-    flex-grow: 1; /* Makes content area flexible */
+    flex-grow: 1;
+    /* Makes content area flexible */
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Keeps content at the top */
+    justify-content: flex-start;
+    /* Keeps content at the top */
 }
 
 /* Card Title */
@@ -434,38 +474,42 @@ button:hover {
     justify-content: space-around;
     gap: 10px;
     padding: 10px;
-    margin-top: auto; /* Pushes buttons to the bottom */
+    margin-top: auto;
+    /* Pushes buttons to the bottom */
     width: 100%;
 }
 
 /* Buttons Styling */
-button.view-btn, button.edit-btn, button.delete-btn {
+button.view-btn,
+button.edit-btn,
+button.delete-btn {
     padding: 10px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
-    width: 40%; /* Ensures buttons are well-spaced */
+    width: 40%;
+    /* Ensures buttons are well-spaced */
 }
 
 /* View Button */
 button.view-btn {
-    background-color: #007bff;
+    background-color: #333459;
     color: white;
 }
 
 button.view-btn:hover {
-    background-color: #0056b3;
+    background-color: #333459;
 }
 
 /* Edit Button */
 button.edit-btn {
-    background-color: #007bff;
+    background-color: #333459;
     color: white;
 }
 
 button.edit-btn:hover {
-    background-color: #0056b3;
+    background-color: #333459;
 }
 
 /* Delete Button */
@@ -477,7 +521,6 @@ button.delete-btn {
 button.delete-btn:hover {
     background-color: #a71d2a;
 }
-
 
 /* Modal Styling */
 .modal {
@@ -519,7 +562,7 @@ button.delete-btn:hover {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #007bff;
+    background-color: #333459;
     color: white;
     border: none;
     border-radius: 50%;
@@ -545,7 +588,7 @@ body {
 
 .main-content {
     flex-grow: 1;
-    padding: 40px 30px;
+    padding: 90px 30px;
     background: #ffffff;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
@@ -563,8 +606,8 @@ body {
 }
 
 .admin-header h1 {
-    font-size: 24px;
-    color: #333;
+    font-size: 28px;
+    color: white;
     font-weight: 600;
 }
 
@@ -589,36 +632,49 @@ body {
     margin-left: auto;
     margin-right: auto;
     display: flex;
-    justify-content: center; /* Centers content horizontally */
-    align-items: flex-start; /* Aligns content at the top vertically */
-    flex-direction: column;  /* Stacks content vertically */
-    padding: 40px; /* Adds padding for space */
-    min-height: 80vh; /* Ensures the container takes up 80% of the viewport */
-    width: 100%; /* Ensures it spans full width */
-    background-color: #f9f9f9; /* Light background for better contrast */
+    justify-content: center;
+    /* Centers content horizontally */
+    align-items: flex-start;
+    /* Aligns content at the top vertically */
+    flex-direction: column;
+    /* Stacks content vertically */
+    padding: 40px;
+    /* Adds padding for space */
+    min-height: 80vh;
+    /* Ensures the container takes up 80% of the viewport */
+    width: 100%;
+    /* Ensures it spans full width */
+    background-color: #f9f9f9;
+    /* Light background for better contrast */
 }
 
 .detail-card {
-    margin-left:20px;
+    margin-left: 20px;
     background: white;
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     padding: 30px;
-    width: 100%; /* Ensures the card does not stretch too wide */
-    max-width: 900px; /* Maximum width for larger screens */
+    width: 100%;
+    /* Ensures the card does not stretch too wide */
+    max-width: 900px;
+    /* Maximum width for larger screens */
     box-sizing: border-box;
-    margin: 0 auto; /* Centers the card horizontally */
+    margin: 0 auto;
+    /* Centers the card horizontally */
 }
 
 .detail-header {
     display: flex;
-    align-items: center; /* Vertically centers the logo and text */
+    align-items: center;
+    /* Vertically centers the logo and text */
     margin-bottom: 20px;
-    justify-content: flex-start; /* Aligns the items to the left */
+    justify-content: flex-start;
+    /* Aligns the items to the left */
 }
 
 .item-logo {
-    width: 100px; /* Adjusted size for logo */
+    width: 100px;
+    /* Adjusted size for logo */
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
@@ -627,7 +683,8 @@ body {
 }
 
 .detail-header h2 {
-    font-size: 24px; /* Slightly smaller header for better readability */
+    font-size: 24px;
+    /* Slightly smaller header for better readability */
     color: #2c3e50;
     font-weight: 600;
 }
@@ -640,20 +697,24 @@ body {
 /* Input fields and buttons container */
 .input-group {
     display: flex;
-    align-items: center; /* Aligns items in a row */
+    align-items: center;
+    /* Aligns items in a row */
     width: 90%;
-    margin-bottom: 15px; /* Adds spacing between input groups */
+    margin-bottom: 15px;
+    /* Adds spacing between input groups */
 }
 
 /* Style for input fields */
 .input-group input {
-    flex-grow: 1; /* Makes the input field take full width */
+    flex-grow: 1;
+    /* Makes the input field take full width */
     padding: 30px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
     width: 70%;
 }
+
 /*Styles for pdate buttons */
 .field-group {
     margin-left: auto;
@@ -669,7 +730,7 @@ body {
 label {
     margin-left: 12px;
     font-size: 25px;
-    color:black;
+    color: black;
     margin-bottom: 5px;
     display: block;
 }
@@ -682,7 +743,6 @@ label {
     gap: 10px;
     margin-bottom: 15px;
 }
-
 
 
 input[type="text"] {
@@ -716,7 +776,7 @@ input[type="text"]:disabled {
 /* Style for update button */
 .update-btn {
     padding: 12px;
-    background-color: #3498db;
+    background-color: #333459;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -724,12 +784,14 @@ input[type="text"]:disabled {
     cursor: pointer;
     text-align: center;
     transition: background-color 0.3s ease;
-    width: 120px; /* Fixed width for uniformity */
-    margin-left: 10px; /* Adds space between input and button */
+    width: 120px;
+    /* Fixed width for uniformity */
+    margin-left: 10px;
+    /* Adds space between input and button */
 }
 
 .update-btn:hover {
-    background-color: #2980b9;
+    background-color: #333459;
 }
 
 /* Error Message */
@@ -741,11 +803,11 @@ input[type="text"]:disabled {
     margin-top: 10px;
 }
 
-
 /* Category Section */
 .category-container {
     margin-left: 80px;
-    margin-right: 80px;;
+    margin-right: 80px;
+    ;
     margin-bottom: 30px;
     padding: 20px;
     border-radius: 8px;
@@ -796,8 +858,10 @@ input[type="text"]:disabled {
 /* Ensure the parent container has flex or block layout for centering */
 .save-btn-container {
     display: flex;
-    justify-content: center;  /* Centers horizontally */
-    align-items: center;      /* Centers vertically (if height is defined) */
+    justify-content: center;
+    /* Centers horizontally */
+    align-items: center;
+    /* Centers vertically (if height is defined) */
     width: 100%;
     margin-top: 30px;
 }
@@ -805,18 +869,20 @@ input[type="text"]:disabled {
 /* Save Button Styling */
 .save-btn {
     padding: 14px;
-    background-color:#27ae60;
+    background-color: #333459;
     color: white;
     border: none;
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
     text-align: center;
-    width: 100%; /* Or specific width if required */
-    max-width: 2000px; /* Optional: limits the max width */
+    width: 100%;
+    /* Or specific width if required */
+    max-width: 2000px;
+    /* Optional: limits the max width */
     transition: background-color 0.3s ease;
 }
 
 .save-btn:hover {
-    background-color: #27ae60;
+    background-color: #333459;
 }
