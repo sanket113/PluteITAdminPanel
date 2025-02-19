@@ -199,6 +199,7 @@ function fetchCategoriesForRelationship(relatedItemsByCategory) {
       itemsRef,
       (itemsSnapshot) => {
         const items = itemsSnapshot.val() || {}; // Ensure items exist before looping
+        window.items = Object.values(items);
 
         Object.entries(categories).forEach(([catId, category]) => {
           if (catId !== categoryId) {
@@ -305,11 +306,19 @@ function saveItemDetails() {
       categoryDiv.querySelectorAll(".category-checkbox:checked")
     );
 
+    var selectedItem = window.items;
+
     selectedItems.forEach((checkbox) => {
       const selectedItemId = checkbox.value;
-      const selectedItemName =
-        window.categoriesData[selectedCategoryId]?.items[selectedItemId]
-          ?.name || "";
+      if (window.items) {
+        selectedItem = window.items.find(
+          (item) =>
+            item.Uid === selectedItemId &&
+            item.categoryUid === selectedCategoryId
+        );
+      }
+
+      const selectedItemName = selectedItem ? selectedItem.name : "";
 
       if (categoryName && selectedItemName) {
         if (!relatedItemsByCategory[selectedCategoryId]) {
@@ -331,15 +340,26 @@ function saveItemDetails() {
 
     // Remove unchecked relationships
     const previouslySelected =
-      window.categoriesData[selectedCategoryId]?.items || {};
+      window.items.find((item) => item.uid === itemId)
+        ?.relatedItemsByCategory?.[selectedCategoryId] || {};
+
+    console.log("Previously Selected Related Items:", previouslySelected);
+
     Object.keys(previouslySelected).forEach((relatedItemId) => {
       if (!selectedItems.some((checkbox) => checkbox.value === relatedItemId)) {
         relatedUpdates[
           `/items/${itemId}/relatedItemsByCategory/${selectedCategoryId}/${relatedItemId}`
         ] = null;
+
+        console.log("Sushant", selectedCategoryId);
+        console.log("Gaurav", relatedItemId);
+
         relatedUpdates[
           `/items/${relatedItemId}/relatedItemsByCategory/${categoryId}/${itemId}`
         ] = null;
+
+        console.log("Sanket", categoryId);
+        console.log("Vedant", itemId);
       }
     });
   });
