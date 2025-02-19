@@ -9,8 +9,6 @@ import { testDomainUrl } from "../js/constant.js";
 const categoryGrid = document.getElementById("category-grid");
 const adminName = document.getElementById("admin-name");
 const logoutButton = document.getElementById("logout-button");
-const urlParams = new URLSearchParams(window.location.search);
-const categoryId = urlParams.get("categoryId");
 
 // Check if the user is authenticated
 checkAuthStatus((user) => {
@@ -34,11 +32,7 @@ onValue(categoriesRef, (snapshot) => {
     // Create a card for each category
     const card = document.createElement("div");
     card.classList.add("card");
-     
-    card.addEventListener("click", () => {
-      window.location.href = `view-items.html?categoryId=${encodeURIComponent(childSnapshot.key)}`;
-    });
-    
+
     const img = document.createElement("img");
     img.src = category.image;
     img.alt = `${category.title} image`;

@@ -313,7 +313,7 @@ function saveItemDetails() {
       if (window.items) {
         selectedItem = window.items.find(
           (item) =>
-            item.Uid === selectedItemId &&
+            item.uid === selectedItemId &&
             item.categoryUid === selectedCategoryId
         );
       }

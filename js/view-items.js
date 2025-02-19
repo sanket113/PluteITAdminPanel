@@ -120,11 +120,6 @@ onValue(itemsRef, (snapshot) => {
         const card = document.createElement("div");
         card.classList.add("card");
 
-
-        // Add click event to navigate to the detail view
-      card.addEventListener("click", () => {
-        window.location.href = `detail-view.html?categoryId=${categoryId}&itemId=${itemId}`;
-      });
         const img = document.createElement("img");
         img.src = item.logo || "default.jpeg";
         img.alt = `${item.name} image`;
@@ -145,12 +140,12 @@ onValue(itemsRef, (snapshot) => {
         buttonContainer.classList.add("button-container");
 
         // View Button
-        // const viewButton = document.createElement("button");
-        // viewButton.textContent = "View";
-        // viewButton.classList.add("btn", "view-btn");
-        // viewButton.addEventListener("click", () => {
-        //   window.location.href = `detail-view.html?categoryId=${categoryId}&itemId=${itemId}`;
-        // });
+        const viewButton = document.createElement("button");
+        viewButton.textContent = "View";
+        viewButton.classList.add("btn", "view-btn");
+        viewButton.addEventListener("click", () => {
+          window.location.href = `detail-view.html?categoryId=${categoryId}&itemId=${itemId}`;
+        });
 
         // Delete Button
         const deleteButton = document.createElement("button");
@@ -158,7 +153,7 @@ onValue(itemsRef, (snapshot) => {
         deleteButton.classList.add("btn", "delete-btn");
         deleteButton.addEventListener("click", () => deleteItem(itemId));
 
-        //buttonContainer.appendChild(viewButton);
+        buttonContainer.appendChild(viewButton);
         buttonContainer.appendChild(deleteButton);
 
         cardContent.appendChild(title);
