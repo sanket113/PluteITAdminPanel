@@ -113,8 +113,13 @@ onValue(itemsRef, (snapshot) => {
     );
 
     if (categoryItems.length > 0) {
-      categoryTitle.textContent = `Items in "${categoryTitle}"`;
-
+      onValue(categoriesRef, (categorySnapshot) => {
+        const categories = categorySnapshot.val() || {};
+        if (categories[categoryId]) {
+          categoryTitle.textContent = `Items in ${categories[categoryId].title}`;
+        }
+      });
+      
       categoryItems.forEach(([itemId, item]) => {
         // Create item card
         const card = document.createElement("div");
