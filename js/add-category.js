@@ -147,23 +147,58 @@ onValue(categoriesRef, (snapshot) => {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.classList.add("delete-btn");
-    deleteButton.addEventListener("click", () => {
-      // Confirm deletion
+    deleteButton.addEventListener("click", async () => {
       const confirmDelete = confirm(
-        `Are you sure you want to delete the category "${category.title}"?`
+        `Are you sure you want to delete the category "${category.title}" and all its related items?`
       );
+    
       if (confirmDelete) {
-        // Remove the category from Firebase
-        const categoryRef = ref(database, `${testDomainUrl}/${categoryId}`);
-        remove(categoryRef)
-          .then(() => {
-            alert(`Category "${category.title}" deleted successfully.`);
-          })
-          .catch((error) => {
-            console.error("Error deleting category:", error);
-          });
+        const categoryRef = ref(database, `categories/${categoryId}`);
+        const itemsRef = ref(database, `items`);
+    
+        try {
+          // Delete the category itself
+          await remove(categoryRef);
+    
+          // Fetch all items to find the ones related to this category
+          onValue(
+            itemsRef,
+            async (snapshot) => {
+              if (snapshot.exists()) {
+                const updates = {};
+    
+                snapshot.forEach((childSnapshot) => {
+                  const itemId = childSnapshot.key;
+                  const itemData = childSnapshot.val();
+    
+                  // If the item belongs to the category, mark it for deletion
+                  if (itemData.categoryUid === categoryId) {
+                    updates[`items/${itemId}`] = null; // Mark item for deletion
+                  }
+    
+                  // Remove category references from relatedItemsByCategory
+                  if (itemData.relatedItemsByCategory?.[categoryId]) {
+                    updates[`items/${itemId}/relatedItemsByCategory/${categoryId}`] =
+                      null;
+                  }
+                });
+    
+                // Perform all deletions at once
+                if (Object.keys(updates).length > 0) {
+                  await update(ref(database), updates);
+                }
+              }
+            },
+            { onlyOnce: true }
+          );
+    
+          alert(`Category "${category.title}" and all related items deleted successfully.`);
+        } catch (error) {
+          console.error("Error deleting category:", error);
+        }
       }
     });
+    
 
     // Append buttons to button container
     // buttonContainer.appendChild(viewButton);
