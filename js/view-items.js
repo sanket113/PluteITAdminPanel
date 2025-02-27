@@ -191,6 +191,18 @@ closeModal.addEventListener("click", () => {
   // Hide the modal
   addItemModal.classList.add("hidden");
 });
+document.addEventListener("DOMContentLoaded", () => {
+  const tagsList = document.getElementById("tags-list");
+  const addTagBtn = document.getElementById("add-tag-btn");
+
+  addTagBtn.addEventListener("click", () => {
+    const newTagInput = document.createElement("input");
+    newTagInput.type = "text";
+    newTagInput.className = "tag-input";
+    newTagInput.placeholder = "Enter tag";
+    tagsList.appendChild(newTagInput);
+  });
+});
 
 // Handle new item submission
 addItemForm.addEventListener("submit", async (e) => {
@@ -203,13 +215,24 @@ addItemForm.addEventListener("submit", async (e) => {
   const shortDescription = document.getElementById("short-description").value;
   const roadmaps = [];
   const all_about_img = document.getElementById("all=about-img").value;
+
+  //Editing on 24feb
+
+  const timestamp = Date.now(); // Current time in Unix Epoch ms
+  const updatedAt = timestamp; // Initially the same as timestamp
   for (let i = 1; i <= 4; i++) {
     const roadmap = document.getElementById(`item-roadmap${i}`).value;
     if (roadmap) {
       roadmaps.push(roadmap);
     }
   }
-
+// Collect tags dynamically
+  const tags = [];
+  document.querySelectorAll(".tag-input").forEach((input) => {
+    if (input.value.trim() !== "") {
+      tags.push(input.value.trim());
+    }
+  });
   // Collect uses data (modified to store title and description separately)
   const uses = [];
   document.querySelectorAll(".use-entry").forEach((useDiv) => {
@@ -251,6 +274,14 @@ addItemForm.addEventListener("submit", async (e) => {
       });
     });
   });
+  // Get tags (assuming tags are comma-separated input)
+  
+
+  // Get priority
+  const priority = parseInt(document.getElementById("item-priority").value) || 0;
+
+  // Get isActive status
+  const isActive = document.getElementById("item-active").checked;
 
   try {
     const newItemRef = push(ref(database, "items")); // Create a new item node
@@ -268,6 +299,12 @@ addItemForm.addEventListener("submit", async (e) => {
       relatedItemsByCategory: relatedItemsByCategory,
       uid: "" + newItemRef.key,
       categoryUid: categoryId,
+      timestamp: timestamp, // Creation time
+      updatedAt: updatedAt, // Last update time
+      
+      isActive: isActive, // Boolean flag
+      priority: priority, // Priority ranking
+      tags: tags, // Array of tags
     };
     await set(newItemRef, newItemData); // Store new item in "items" collection
 

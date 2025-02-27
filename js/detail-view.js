@@ -2,6 +2,7 @@ import {
   ref,
   onValue,
   update,
+  get
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { database } from "../js/firebase-config.js";
 import { checkAuthStatus, logout } from "../js/session.js";
@@ -71,7 +72,13 @@ onValue(itemRef, (snapshot) => {
           "roadmap4",
           item.roadmaps?.[3] || ""
         )}
+        
+        ${generateFieldView("Priority", "priority", item.priority)}
+        ${generateCheckboxField("Is Active", "isActive", item.isActive)}
+        
+        ${generateTagsFieldView(item.tags || [])} <!-- Dynamically render tags -->
 
+      </div>
       </div>
     `;
 
@@ -103,6 +110,115 @@ onValue(itemRef, (snapshot) => {
     saveButton.onclick = saveItemDetails;
   }
 });
+
+
+// Function to generate checkbox field for "Is Active"
+// Function to generate checkbox field for "Is Active" with toggle switch styling
+function generateCheckboxField(label, field, value) {
+  return `
+    <div class="field checkbox-field">
+      <label for="input-${field}">${label}:</label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="input-${field}" ${value ? "checked" : ""} />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  `;
+}
+
+// Function to generate tags field dynamically
+// Function to generate tags field dynamically
+function generateTagsFieldView(tags) {
+  return `
+    <div class="tags-container">
+      <label>Tags:</label>
+      <div id="tags-list">
+        ${tags
+          .map(
+            (tag, index) =>
+              `<div class="tag-item" data-index="${index}">
+                <input type="text" class="tag-input" value="${tag}" disabled />
+                <button type="button" class="remove-tag-btn" data-index="${index}">×</button>
+              </div>`
+          )
+          .join("")}
+      </div>
+      <input type="text" id="new-tag-input" placeholder="Enter new tag" />
+      <button type="button" id="add-tag-btn">+</button>
+    </div>
+  `;
+}
+document.addEventListener("click", function (event) {
+  if (event.target.id === "add-tag-btn") {
+    addTag();
+  }
+});
+
+
+// Function to add a new tag
+function addTag() {
+  const tagsList = document.getElementById("tags-list");
+  const newTagInput = document.getElementById("new-tag-input");
+  const newTag = newTagInput.value.trim();
+
+  if (newTag === "") {
+    alert("Tag cannot be empty!");
+    return;
+  }
+
+  const newIndex = tagsList.children.length; // Get the current index
+
+  const tagItem = document.createElement("div");
+  tagItem.classList.add("tag-item");
+  tagItem.dataset.index = newIndex;
+
+  tagItem.innerHTML = `
+    <input type="text" class="tag-input" value="${newTag}" disabled />
+    <button type="button" class="remove-tag-btn" data-index="${newIndex}">×</button>
+  `;
+
+  tagsList.appendChild(tagItem);
+  newTagInput.value = ""; // Clear input field
+
+  // Attach event listener to the new remove button
+  tagItem.querySelector(".remove-tag-btn").addEventListener("click", function () {
+    removeTag(newIndex);
+  });
+}
+document.addEventListener("click", function (event) {
+  if (event.target.classList.contains("remove-tag-btn")) {
+    const index = event.target.dataset.index;
+    removeTag(index);
+  }
+});
+
+// Function to remove a tag
+function removeTag(index) {
+  const tagToRemove = document.querySelector(`.tag-item[data-index="${index}"]`);
+  if (tagToRemove) {
+    tagToRemove.remove();
+
+    // Re-index remaining tags
+    document.querySelectorAll(".tag-item").forEach((el, newIndex) => {
+      el.dataset.index = newIndex;
+      el.querySelector(".remove-tag-btn").dataset.index = newIndex;
+    });
+  } else {
+    console.error(`Tag with index ${index} not found.`);
+  }
+}
+
+// Attach event listeners
+document.addEventListener("DOMContentLoaded", function () {
+
+  document.querySelectorAll(".remove-tag-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const index = button.dataset.index;
+      removeTag(index);
+    });
+  });
+});
+
 
 // Helper function to generate "Uses" array fields
 function generateUsesFieldView(uses) {
@@ -269,14 +385,19 @@ function saveItemDetails() {
     document.getElementById("input-roadmap4"),
   ];
   const infoInput = document.getElementById("input-info");
+  const priorityInput = document.getElementById("input-priority");
+  const isActiveCheckbox = document.getElementById("input-isActive");
 
-  if (!nameInput || !logoInput || !basicRoadmapInput || !infoInput) {
+
+  if (!nameInput || !logoInput || !basicRoadmapInput || !infoInput || !priorityInput) {
     console.error("One or more required input fields are missing.");
     return;
   }
 
   const name = nameInput.value;
   const logo = logoInput.value;
+  const priority = priorityInput.value.trim();
+  const isActive = isActiveCheckbox.checked; // Get checkbox value (true/false)
   const uses = [];
   document.querySelectorAll(".field-group").forEach((group) => {
     const titleInput = group.querySelector('[id^="input-uses-title"]');
@@ -294,7 +415,10 @@ function saveItemDetails() {
   const info = infoInput.value;
   const shortDescInput = document.getElementById("input-shortDesc");
   const shortDescription = shortDescInput ? shortDescInput.value : "";
-
+// Tags Handling
+const tags = Array.from(document.querySelectorAll(".tag-input")).map((input) =>
+  input.value.trim()
+);
   const relatedItemsByCategory = {};
   const relatedUpdates = {}; // Separate updates for relationships
 
@@ -374,13 +498,18 @@ function saveItemDetails() {
     roadmaps,
     info,
     relatedItemsByCategory,
+    priority,
+    isActive,
+    tags: tags.length > 0 ? tags : [],
+    updatedTimestamp: Date.now()
   };
 
   if (
     name.length > 0 &&
     logo.length > 0 &&
     shortDescription.length > 0 &&
-    info.length
+    info.length > 0 &&
+    priority.length>0
   ) {
     // Update the item in Firebase
     update(itemRef, updatedData)
