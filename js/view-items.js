@@ -210,6 +210,7 @@ addItemForm.addEventListener("submit", async (e) => {
 
   const title = document.getElementById("item-title").value;
   const description = document.getElementById("item-description").value;
+  const references = document.getElementById("roadmap-references").value;
   const image = document.getElementById("item-image").value;
   const basicRoadmap = document.getElementById("item-basic-roadmap").value;
   const shortDescription = document.getElementById("short-description").value;
@@ -305,6 +306,7 @@ addItemForm.addEventListener("submit", async (e) => {
       isActive: isActive, // Boolean flag
       priority: priority, // Priority ranking
       tags: tags, // Array of tags
+      roadmapReferences: references,
     };
     await set(newItemRef, newItemData); // Store new item in "items" collection
 
