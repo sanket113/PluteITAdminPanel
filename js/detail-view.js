@@ -53,6 +53,11 @@ onValue(itemRef, (snapshot) => {
           item.basicRoadmap
         )}
         ${generateFieldView(
+          "Roadmap References",
+          "roadmapReferences",
+          item.roadmapReferences
+        )}
+        ${generateFieldView(
           "Roadmap URL 1",
           "roadmap1",
           item.roadmaps?.[0] || ""
@@ -375,6 +380,7 @@ function fetchCategoriesForRelationship(relatedItemsByCategory) {
 // Save item details, including related items
 function saveItemDetails() {
   const nameInput = document.getElementById("input-name");
+  const reference = document.getElementById("input-roadmapReferences");
   const logoInput = document.getElementById("input-logo");
   const usesInput = document.getElementById("input-uses");
   const basicRoadmapInput = document.getElementById("input-basicRoadmap");
@@ -414,6 +420,7 @@ function saveItemDetails() {
   const roadmaps = roadmapInputs.map((input) => input.value);
   const info = infoInput.value;
   const shortDescInput = document.getElementById("input-shortDesc");
+  const roadmapReferences = reference ? reference.value : "";
   const shortDescription = shortDescInput ? shortDescInput.value : "";
 // Tags Handling
 const tags = Array.from(document.querySelectorAll(".tag-input")).map((input) =>
@@ -493,6 +500,7 @@ const tags = Array.from(document.querySelectorAll(".tag-input")).map((input) =>
     name,
     logo,
     shortDescription,
+    roadmapReferences,
     uses: uses.length > 0 ? uses : [], // Ensure it remains an array
     basicRoadmap,
     roadmaps,
