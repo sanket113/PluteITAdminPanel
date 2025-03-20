@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Items</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar Placeholder -->
+      <div id="sidebar-container"></div>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <h2 id="category-title"></h2>
+        <div id="item-grid" class="grid-container"></div>
+
+        <!-- Floating Add Button -->
+        <button id="add-item-btn" class="floating-btn">+</button>
+      </div>
+    </div>
+
+    <!-- Modal Dialog -->
+    <div id="add-item-modal" class="modal hidden">
+      <div class="modal-content">
+        <span id="close-modal" class="close-btn">&times;</span>
+        <h2>Add New Item</h2>
+        <form id="add-item-form">
+          <input
+            type="text"
+            id="item-title"
+            placeholder="Item Title"
+            required
+          />
+          <textarea
+            id="item-description"
+            placeholder="Enter Item Description in HTML"
+            required
+          ></textarea>
+
+          <!-- Add a new input field for short description -->
+          <label for="short-description">Short Description:</label>
+          <input
+            type="text"
+            id="short-description"
+            placeholder="Enter short description"
+            required
+          />
+
+          <!-- Modify the "Uses" section -->
+          <div id="uses-container">
+            <div class="use-item"></div>
+          </div>
+          <button type="button" id="add-use-btn" class="add-use-btn">
+            + Add Uses
+          </button>
+          <!-- Modify the "Uses" section -->
+          <input type="url" id="item-image" placeholder="Image URL" required />
+          <input
+            type="url"
+            id="item-basic-roadmap"
+            placeholder="Basic Roadmap URL"
+            required
+          />
+
+          <textarea
+            id="roadmap-references"
+            placeholder="Enter Roadmap References in HTML"
+            required
+          ></textarea>
+
+          <input
+            type="url"
+            id="all=about-img"
+            placeholder="All About Image URL"
+          />
+
+          <input type="text" id="item-roadmap1" placeholder="Roadmap url" />
+          <input type="text" id="item-roadmap2" placeholder="Roadmap url" />
+          <input type="text" id="item-roadmap3" placeholder="Roadmap url" />
+          <input type="text" id="item-roadmap4" placeholder="Roadmap url" />
+          <div class="tags-container">
+            <label for="item-tags">Tags:</label>
+            <div id="tags-list">
+              <input type="text" class="tag-input" placeholder="Enter tag" />
+            </div>
+            <button type="button" id="add-tag-btn">+</button>
+          </div>
+
+          <label for="item-priority">Priority:</label>
+          <input type="number" id="item-priority" />
+
+          <div class="checkbox-field">
+            <label for="isActive">Is Active:</label>
+            <label class="toggle-switch">
+              <input type="checkbox" id="item-active" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div id="category-selectors"></div>
+
+          <button type="submit">Add Item</button>
+        </form>
+      </div>
+    </div>
+
+    <script type="module" src="../js/sidebar.js"></script>
+    <script type="module" src="../js/view-items.js"></script>
+  </body>
+</html>
