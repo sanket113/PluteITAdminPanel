@@ -11,7 +11,6 @@ import { database } from "../js/firebase-config.js";
 import { testDomainUrl } from "../js/constant.js";
 import { title } from "../js/sidebar.js";
 
-
 // Check if user is authenticated
 checkAuthStatus((user) => {
   console.log(`User logged in: ${user.email}`);
@@ -123,9 +122,9 @@ onValue(categoriesRef, (snapshot) => {
     // });
 
     card.style.cursor = "pointer";
-    // card.addEventListener("click", () => {
-    //   window.location.href = `view-items.html?categoryId=${categoryId}`;
-    // });
+    card.addEventListener("click", () => {
+      window.location.href = `view-items.html?categoryId=${categoryId}`;
+    });
 
     // Edit button
     const editButton = document.createElement("button");
@@ -287,5 +286,3 @@ editCategoryForm.addEventListener("submit", (e) => {
     { onlyOnce: true }
   );
 });
-
-

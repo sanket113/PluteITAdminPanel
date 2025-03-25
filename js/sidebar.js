@@ -130,6 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const adminName = document.getElementById("admin-name");
       const logoutButton = document.getElementById("logout-button");
+      const headerTitle = document.getElementById("category-title");
+
+      console.log(headerTitle);
 
       checkAuthStatus((user) => {
         // Display the user's email or name in the admin panel
@@ -140,6 +143,12 @@ document.addEventListener("DOMContentLoaded", () => {
       logoutButton.addEventListener("click", () => {
         logout();
       });
+      if (
+        window.location.pathname.includes("add-category.html") &&
+        headerTitle
+      ) {
+        headerTitle.textContent = "Existing Categories";
+      }
     })
     .catch((error) => console.error("Error loading sidebar:", error));
 });
