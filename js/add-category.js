@@ -131,8 +131,9 @@ onValue(categoriesRef, (snapshot) => {
     editButton.textContent = "Edit";
     ``;
     editButton.classList.add("edit-btn");
-    editButton.addEventListener("click", () => {
+    editButton.addEventListener("click", (event) => {
       // Open the edit modal and populate the form
+      event.stopPropagation();
       currentCategoryId = categoryId; // Store the category ID being edited
       document.getElementById("edit-category-title").value = category.title;
       document.getElementById("edit-category-subtitle").value =
@@ -148,7 +149,9 @@ onValue(categoriesRef, (snapshot) => {
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.classList.add("delete-btn");
-    deleteButton.addEventListener("click", async () => {
+    deleteButton.addEventListener("click", async (event) => {
+      event.stopPropagation();
+
       const confirmDelete = confirm(
         `Are you sure you want to delete the category "${category.title}" and all its related items?`
       );
