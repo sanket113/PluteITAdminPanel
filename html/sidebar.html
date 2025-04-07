@@ -1,0 +1,102 @@
+<!-- <aside class="sidebar">
+  <div class="sidebar-header">
+    <h2>Admin Panel</h2>
+  </div>
+
+  <ul class="sidebar-menu" id="sidebar-menu">
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="add-category.html">Add Categories</a></li>
+  </ul>
+
+  <div class="header-profile">
+    <span id="admin-name"></span>
+    <button id="logout-button" class="logout-btn">Logout</button>
+  </div>
+</aside> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--=============== REMIXICONS ===============-->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.css"
+    />
+
+    <!--=============== CSS ===============-->
+    <link rel="stylesheet" href="../assests/css/sidebar-design.css" />
+
+    <title>Responsive Sidebar Menu</title>
+  </head>
+  <body>
+    <!--=============== HEADER ===============-->
+    <header class="header" id="header">
+      <div class="header__container">
+        <a href="#" class="header__logo">
+          <img
+            class="plute_it_logo"
+            src="../assests/App_Logo.png"
+            alt="Plute_IT"
+          />
+          <span>Plutecoder</span>
+        </a>
+
+        <button class="header__toggle" id="header-toggle">
+          <i class="ri-menu-line"></i>
+        </button>
+
+        <div id="category-title" class="header__title"></div>
+      </div>
+    </header>
+
+    <!--=============== SIDEBAR ===============-->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar__container">
+        <div class="sidebar__user">
+          <div class="sidebar__img">
+            <img src="../assests/profile.png" alt="image" />
+          </div>
+
+          <div class="sidebar__info">
+            <h3>PluteCoders</h3>
+            <span id="admin-name">pluteit@gmail.com</span>
+          </div>
+        </div>
+
+        <div class="sidebar__content">
+          <div>
+            <h3 class="sidebar__title">MANAGE</h3>
+
+            <div class="sidebar__list" id="sidebar__list">
+              <a href="add-category.html" class="sidebar__link">
+                <i class="ri-folder-add-fill"></i>
+                <span>Add Categories</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar__actions">
+          <button>
+            <i
+              class="ri-moon-clear-fill sidebar__link sidebar__theme"
+              id="theme-button"
+            >
+              <span>Theme</span>
+            </i>
+          </button>
+
+          <button class="sidebar__link" id="logout-button">
+            <i class="ri-logout-box-r-fill"></i>
+            <span>Log Out</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+    <!--=============== MAIN JS ===============-->
+    <script src="../js/sidebar.js"></script>
+  </body>
+</html>

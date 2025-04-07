@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.779.0",
+    "@aws-sdk/s3-request-presigner": "^3.779.0",
+    "cors": "^2.8.5",
+    "firebase-functions": "^6.3.2"
+  }
+}
