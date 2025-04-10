@@ -26,7 +26,7 @@ async function uploadToS3(file, folder, uid) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       uid,
-      fileType: file.type,
+      fileType: "items",
       fileName: `${folder}/${fileName}`
     }),
   });
@@ -95,9 +95,9 @@ onValue(categoriesRef, (categorySnapshot) => {
           categoryContainer.dataset.categoryId = catId;
 
           // Category title
-          //   const categoryTitle = document.createElement("h4");
-          //   categoryTitle.textContent = `${category.title}`;
-          //   categoryContainer.appendChild(categoryTitle);
+             const categoryTitle = document.createElement("h4");
+             categoryTitle.textContent = `${category.title}`;
+             categoryContainer.appendChild(categoryTitle);
 
           // Checkbox group
           const checkboxGroup = document.createElement("div");
