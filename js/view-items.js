@@ -10,6 +10,46 @@ import {
 import { database } from "../js/firebase-config.js";
 import { checkAuthStatus, logout } from "../js/session.js";
 import { testDomainUrl } from "../js/constant.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-functions.js";
+
+import { app } from "../js/firebase-config.js"; // make sure app is exported
+const functions = getFunctions(app);
+const deleteImageFromS3 = httpsCallable(functions, "deleteImageFromS3");
+
+
+
+async function uploadToS3(file, folder, uid) {
+  const fileName = `${Date.now()}-${file.name}`;
+
+  const response = await fetch("https://us-central1-pluteit-205c0.cloudfunctions.net/generateUploadUrl", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      uid,
+      fileType: file.type,
+      fileName: `${folder}/${fileName}`
+    }),
+  });
+
+  const data = await response.json();
+  if (!data.uploadURL) throw new Error("Upload URL not returned");
+
+  await fetch(data.uploadURL, {
+    method: "PUT",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+
+  await fetch("https://us-central1-pluteit-205c0.cloudfunctions.net/makeFilePublic", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fileKey: data.fileKey }),
+  });
+
+  return data.fileURL;
+}
+
+
 // DOM Elements
 //const categoryTitle = document.getElementById("category-title");
 const itemGrid = document.getElementById("item-grid");
@@ -203,11 +243,11 @@ addItemForm.addEventListener("submit", async (e) => {
   const title = document.getElementById("item-title").value;
   const description = document.getElementById("item-description").value;
   const references = document.getElementById("roadmap-references").value;
-  const image = document.getElementById("item-image").value;
-  const basicRoadmap = document.getElementById("item-basic-roadmap").value;
+  const logoFile = document.getElementById("item-image").files[0];
+  const basicRoadmapFile = document.getElementById("item-basic-roadmap").files[0];
   const shortDescription = document.getElementById("short-description").value;
   const roadmaps = [];
-  const all_about_img = document.getElementById("all=about-img").value;
+  const allAboutFile = document.getElementById("all-about-img").files[0];
 
   //Editing on 24feb
 
@@ -280,15 +320,32 @@ addItemForm.addEventListener("submit", async (e) => {
     const newItemRef = push(ref(database, "items")); // Create a new item node
     const newItemId = newItemRef.key;
 
-    const newItemData = {
+    
+
+const logo = logoFile ? await uploadToS3(logoFile, "logo", newItemId) : "";
+const basicRoadmap = basicRoadmapFile ? await uploadToS3(basicRoadmapFile, "roadmaps/basic", newItemId) : "";
+const allAbout = allAboutFile ? await uploadToS3(allAboutFile, "allabout", newItemId) : "";
+
+const roadmaps = [];
+for (let i = 1; i <= 4; i++) {
+  const roadmapInput = document.getElementById(`item-roadmap${i}`);
+  const roadmapFile = roadmapInput.files[0];
+  if (roadmapFile) {
+    const roadmapUrl = await uploadToS3(roadmapFile, "roadmaps/advanced", newItemId);
+    roadmaps.push(roadmapUrl);
+  }
+}
+
+
+const newItemData = {
       name: title,
       info: description,
       shortDescription: shortDescription,
-      logo: image,
+      logo: logo,
       uses: uses, // Now stores uses as objects with title and description
       basicRoadmap: basicRoadmap,
       roadmaps: roadmaps,
-      allAbout: all_about_img,
+      allAbout: allAbout,
       relatedItemsByCategory: relatedItemsByCategory,
       uid: "" + newItemRef.key,
       categoryUid: categoryId,
@@ -356,27 +413,38 @@ async function deleteItem(itemId) {
 
     const itemData = itemSnapshot.val();
 
-    // Step 1: Remove references from related items
-    if (itemData.relatedItemsByCategory) {
-      for (const [relatedCategoryId, relatedItems] of Object.entries(
-        itemData.relatedItemsByCategory
-      )) {
-        for (const relatedItemId of Object.keys(relatedItems)) {
-          // Reference to the related item's category
-          const relatedItemRef = ref(
-            database,
-            `items/${relatedItemId}/relatedItemsByCategory/${categoryId}`
-          );
+    // 1️⃣ Delete images from S3
+    const imageUrls = [];
 
-          // Fetch the related item reference
+    if (itemData.logo) imageUrls.push(itemData.logo);
+    if (itemData.basicRoadmap) imageUrls.push(itemData.basicRoadmap);
+    if (itemData.allAbout) imageUrls.push(itemData.allAbout);
+    if (Array.isArray(itemData.roadmaps)) {
+      imageUrls.push(...itemData.roadmaps);
+    }
+
+    for (const url of imageUrls) {
+      const urlObj = new URL(url);
+      const fileKey = decodeURIComponent(urlObj.pathname.slice(1)); // remove leading '/'
+
+      try {
+        await deleteImageFromS3({ key: fileKey });
+        console.log(`✅ Deleted from S3: ${fileKey}`);
+      } catch (err) {
+        console.warn(`⚠️ Failed to delete ${fileKey}:`, err.message);
+      }
+    }
+
+    // 2️⃣ Remove references from related items
+    if (itemData.relatedItemsByCategory) {
+      for (const [relatedCategoryId, relatedItems] of Object.entries(itemData.relatedItemsByCategory)) {
+        for (const relatedItemId of Object.keys(relatedItems)) {
+          const relatedItemRef = ref(database, `items/${relatedItemId}/relatedItemsByCategory/${categoryId}`);
           const relatedItemSnapshot = await get(relatedItemRef);
           if (relatedItemSnapshot.exists()) {
             let relatedItemData = relatedItemSnapshot.val();
-
-            // Remove the deleted item's reference
             delete relatedItemData[itemId];
 
-            // If no more related items exist, remove the node entirely
             if (Object.keys(relatedItemData).length === 0) {
               await remove(relatedItemRef);
             } else {
@@ -387,13 +455,15 @@ async function deleteItem(itemId) {
       }
     }
 
-    // Step 2: Remove the item itself
+    // 3️⃣ Remove the item itself
     await remove(itemRef);
-    alert("Item and its references deleted successfully!");
+    alert("Item and its images deleted successfully!");
   } catch (error) {
-    console.error("Error deleting item:", error);
+    console.error("❌ Error deleting item and images:", error);
   }
 }
+
+
 
 // Add new use case input fields
 addUseButton.addEventListener("click", () => {

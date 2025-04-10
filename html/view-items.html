@@ -56,30 +56,26 @@
             + Add Uses
           </button>
           <!-- Modify the "Uses" section -->
-          <input type="url" id="item-image" placeholder="Image URL" required />
-          <input
-            type="url"
-            id="item-basic-roadmap"
-            placeholder="Basic Roadmap URL"
-            required
-          />
+           <label for="item-image">Enter Logo</label>
+          <input type="file" id="item-image" accept="image/*" required />
+          <label for="item-basic-roadmap">Enter basic roadmap</label>
+
+          <input type="file" id="item-basic-roadmap" accept="image/*" required />
 
           <textarea
             id="roadmap-references"
             placeholder="Enter Roadmap References in HTML"
             required
           ></textarea>
+          <label for="all-about-img">Enter all-about-img</label>
 
-          <input
-            type="url"
-            id="all=about-img"
-            placeholder="All About Image URL"
-          />
+          <input type="file" id="all-about-img" accept="image/*" />
+          <label for="item-roadmap1">Enter Advance Roadmaps</label>
 
-          <input type="text" id="item-roadmap1" placeholder="Roadmap url" />
-          <input type="text" id="item-roadmap2" placeholder="Roadmap url" />
-          <input type="text" id="item-roadmap3" placeholder="Roadmap url" />
-          <input type="text" id="item-roadmap4" placeholder="Roadmap url" />
+          <input type="file" id="item-roadmap1" accept="image/*" />
+          <input type="file" id="item-roadmap2" accept="image/*" />
+          <input type="file" id="item-roadmap3" accept="image/*" />
+          <input type="file" id="item-roadmap4" accept="image/*" />
           <div class="tags-container">
             <label for="item-tags">Tags:</label>
             <div id="tags-list">
@@ -110,3 +106,4 @@
     <script type="module" src="../js/view-items.js"></script>
   </body>
 </html>
+  
