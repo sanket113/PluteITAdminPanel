@@ -234,19 +234,26 @@ onValue(categoriesRef, (snapshot) => {
     ``;
     editButton.classList.add("edit-btn");
     editButton.addEventListener("click", (event) => {
-      // Open the edit modal and populate the form
       event.stopPropagation();
       currentCategoryId = categoryId; // Store the category ID being edited
+    
+      // Populate form fields with existing values
       document.getElementById("edit-category-title").value = category.title;
-      document.getElementById("edit-category-subtitle").value =
-        category.subtitle;
-      document.getElementById("edit-category-image").value = category.image;
-      ``;
+      document.getElementById("edit-category-subtitle").value = category.subtitle;
       document.getElementById("edit-category-type").value = category.Ui_type;
-
-
-      editCategoryModal.classList.remove("hidden"); // Show the edit modal
+    
+      // Display existing category image
+      const currentImageElement = document.getElementById("current-category-image");
+      currentImageElement.src = category.imageUrl;
+      currentImageElement.style.display = "block"; // Show the image
+    
+      // Reset file input (DO NOT set value directly)
+      document.getElementById("edit-category-image").value = "";
+    
+      // Show edit modal
+      editCategoryModal.classList.remove("hidden");
     });
+    
 
 
     // Delete button
@@ -360,112 +367,118 @@ onValue(categoriesRef, (snapshot) => {
 editCategoryForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-
   if (!currentCategoryId) {
     alert("No category selected for editing.");
     return;
   }
 
-
   const categoryRef = ref(database, `${testDomainUrl}/${currentCategoryId}`);
 
+  onValue(categoryRef, async (snapshot) => {
+    const existingCategory = snapshot.val();
 
-  onValue(
-    categoryRef,
-    async (snapshot) => {
-      const existingCategory = snapshot.val();
+    const updatedTitle = document.getElementById("edit-category-title").value;
+    const updatedSubtitle = document.getElementById("edit-category-subtitle").value;
+    const fileInput = document.getElementById("edit-category-image");
+    const updatedType = document.getElementById("edit-category-type").value;
 
+    let updates = {};
+    let updateMessages = [];
+    let newImageUrl = existingCategory.imageUrl;
 
-      const updatedTitle = document.getElementById("edit-category-title").value;
-      const updatedSubtitle = document.getElementById("edit-category-subtitle").value;
-      const updatedType = document.getElementById("edit-category-type").value;
-      const imageInput = document.getElementById("edit-category-image");
-      const newImageFile = imageInput.files[0]; // Get the file object
-
-
-      let updates = {};
-      let updateMessages = [];
-
-
-      // Check for title change
-      if (updatedTitle !== existingCategory.title) {
-        updates.title = updatedTitle;
-        updateMessages.push("Title updated successfully.");
-      }
-
-
-      if (updatedSubtitle !== existingCategory.subtitle) {
-        updates.subtitle = updatedSubtitle;
-        updateMessages.push("Subtitle updated successfully.");
-      }
-
-
-      if (updatedType !== existingCategory.Ui_type) {
-        updates.Ui_type = updatedType;
-        updateMessages.push("UI Type updated successfully.");
-      }
-
-
-      // Handle image replacement if new image uploaded
-      if (newImageFile) {
-        try {
-          const oldImageUrl = existingCategory.image;
-
-
-          // Delete old image from S3
-          if (oldImageUrl) {
-            const parts = oldImageUrl.split(".com/");
-            if (parts.length > 1) {
-              const oldKey = parts[1]; // like category/uid/filename.jpg
-              const deleteImage = firebase.functions().httpsCallable("deleteImageFromS3");
-              await deleteImage({ key: oldKey });
-              console.log("Old image deleted from S3.");
-            }
-          }
-
-          
-          // Upload new image to S3
-          const categoryPath = `category/${currentCategoryId}/`;
-          const newKey = categoryPath + newImageFile.name;
-
-
-          const uploadImage = firebase.functions().httpsCallable("uploadImageToS3");
-          const response = await uploadImage({
-            key: newKey,
-            contentType: newImageFile.type,
-            base64String: await fileToBase64(newImageFile),
-          });
-
-
-          const newImageUrl = response.data.url;
-          updates.image = newImageUrl;
-          updateMessages.push("Image updated successfully.");
-        } catch (err) {
-          console.error("Image update failed:", err);
-          alert("Failed to update image.");
-          return;
-        }
-      }
-
-
-      if (Object.keys(updates).length === 0) {
-        alert("No changes were made.");
-        return;
-      }
-
+    // 🔹 1. If a new image is uploaded, delete the old one from S3
+    if (fileInput.files.length > 0) {
+      const newFile = fileInput.files[0];
 
       try {
-        await update(categoryRef, updates);
-        alert(updateMessages.join("\n"));
-        editCategoryModal.classList.add("hidden");
-        currentCategoryId = null;
+        // Extract S3 key from old image URL
+        if (existingCategory.imageUrl) {
+          const parts = existingCategory.imageUrl.split(".com/");
+          if (parts.length > 1) {
+            const oldS3Key = parts[1];
+
+            // Call Cloud Function to delete old image
+            const deleteImage = httpsCallable(functions, "deleteImageFromS3");
+            const response = await deleteImage({ key: oldS3Key });
+
+            if (!response.data.success) {
+              throw new Error("Failed to delete old image from S3.");
+            }
+          }
+        }
+
+        // 🔹 2. Upload new image to S3
+        const uploadResponse = await fetch("https://us-central1-pluteit-205c0.cloudfunctions.net/generateUploadUrl", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: currentCategoryId,
+            fileType: "category",
+            fileName: newFile.name,
+          }),
+        });
+
+        const data = await uploadResponse.json();
+        if (!data.uploadURL || !data.fileKey) throw new Error("Upload URL not received.");
+
+        // Upload new file to signed URL
+        await fetch(data.uploadURL, {
+          method: "PUT",
+          headers: { "Content-Type": newFile.type },
+          body: newFile,
+        });
+
+        // Make new image public
+        const makePublicResponse = await fetch("https://us-central1-pluteit-205c0.cloudfunctions.net/makeFilePublic", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fileKey: data.fileKey }),
+        });
+
+        const publicData = await makePublicResponse.json();
+        if (!publicData.fileURL) throw new Error("Failed to make new file public.");
+
+        newImageUrl = publicData.fileURL;
+        updateMessages.push("Image updated successfully.");
       } catch (error) {
-        console.error("Error updating category:", error);
-        alert("Failed to update category. Please try again.");
+        console.error("🚨 Error updating image:", error);
+        alert("Failed to update image.");
+        return;
       }
-    },
-    { onlyOnce: true }
-  );
+    }
+
+    // 🔹 3. Update category fields in Firebase
+    if (updatedTitle !== existingCategory.title) {
+      updates.title = updatedTitle;
+      updateMessages.push("Title updated successfully.");
+    }
+    if (updatedSubtitle !== existingCategory.subtitle) {
+      updates.subtitle = updatedSubtitle;
+      updateMessages.push("Subtitle updated successfully.");
+    }
+    if (newImageUrl !== existingCategory.imageUrl) {
+      updates.imageUrl = newImageUrl;
+    }
+    if (updatedType !== existingCategory.Ui_type) {
+      updates.Ui_type = updatedType;
+      updateMessages.push("UI Type updated successfully.");
+    }
+
+    if (Object.keys(updates).length === 0) {
+      alert("No changes were made.");
+      return;
+    }
+
+    try {
+      await update(categoryRef, updates);
+      alert(updateMessages.join("\n"));
+      editCategoryModal.classList.add("hidden");
+      currentCategoryId = null;
+    } catch (error) {
+      console.error("Error updating category:", error);
+      alert("Failed to update category. Please try again.");
+    }
+  }, { onlyOnce: true });
 });
 
 
