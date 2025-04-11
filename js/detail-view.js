@@ -8,6 +8,43 @@ import { database } from "../js/firebase-config.js";
 import { checkAuthStatus, logout } from "../js/session.js";
 import { testDomainUrl } from "../js/constant.js";
 // Extract categoryId and itemId from the URL
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-functions.js";
+import { app } from "../js/firebase-config.js";
+
+const functions = getFunctions(app);
+const deleteImageFromS3 = httpsCallable(functions, "deleteImageFromS3");
+
+async function uploadToS3(file, folder, uid) {
+  const fileName = `${Date.now()}-${file.name}`;
+
+  const response = await fetch("https://us-central1-pluteit-205c0.cloudfunctions.net/generateUploadUrl", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      uid,
+      fileType: "items",
+      fileName: `${folder}/${fileName}`
+    }),
+  });
+
+  const data = await response.json();
+  if (!data.uploadURL) throw new Error("Upload URL not returned");
+
+  await fetch(data.uploadURL, {
+    method: "PUT",
+    headers: { "Content-Type": file.type },
+    body: file,
+  });
+
+  await fetch("https://us-central1-pluteit-205c0.cloudfunctions.net/makeFilePublic", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fileKey: data.fileKey }),
+  });
+
+  return data.fileURL;
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 const categoryId = urlParams.get("categoryId");
 const itemId = urlParams.get("itemId");
@@ -104,6 +141,7 @@ onValue(itemRef, (snapshot) => {
           "roadmap4",
           item.roadmaps?.[3] || ""
         )}
+        ${generateFieldView("All About Image", "allAbout", item.allAbout || "")}
 
         ${generateFieldView("Priority", "priority", item.priority)}
         ${generateCheckboxField("Is Active", "isActive", item.isActive)}
@@ -529,163 +567,194 @@ function fetchCategoriesForRelationship(relatedItemsByCategory) {
 }
 
 // Save item details, including related items
-function saveItemDetails() {
-  const nameInput = document.getElementById("input-name");
-  const reference = document.getElementById("input-roadmapReferences");
-  const logoInput = document.getElementById("input-logo");
-  const usesInput = document.getElementById("input-uses");
-  const basicRoadmapInput = document.getElementById("input-basicRoadmap");
-  const roadmapInputs = [
-    document.getElementById("input-roadmap1"),
-    document.getElementById("input-roadmap2"),
-    document.getElementById("input-roadmap3"),
-    document.getElementById("input-roadmap4"),
-  ];
-  const infoInput = document.getElementById("input-info");
-  const priorityInput = document.getElementById("input-priority");
-  const isActiveCheckbox = document.getElementById("input-isActive");
+async function saveItemDetails() {
+  const loadingOverlay = document.getElementById("loading-overlay");
+loadingOverlay.classList.remove("hidden"); // Show overlay
 
-  if (
-    !nameInput ||
-    !logoInput ||
-    !basicRoadmapInput ||
-    !infoInput ||
-    !priorityInput
-  ) {
-    console.error("One or more required input fields are missing.");
-    return;
-  }
+  try {
+    const itemSnapshot = await get(ref(database, `/items/${itemId}`));
+    const itemData = itemSnapshot.exists() ? itemSnapshot.val() : {};
 
-  const name = nameInput.value;
-  const logo = logoInput.value;
-  const priority = priorityInput.value.trim();
-  const isActive = isActiveCheckbox.checked; // Get checkbox value (true/false)
-  const uses = [];
-  document.querySelectorAll(".field-group").forEach((group) => {
-    const titleInput = group.querySelector('[id^="input-uses-title"]');
-    const descInput = group.querySelector('[id^="input-uses-desc"]');
+    // Fetch elements
+    const nameInput = document.getElementById("input-name");
+    const reference = document.getElementById("input-roadmapReferences");
+    const infoInput = document.getElementById("input-info");
+    const priorityInput = document.getElementById("input-priority");
+    const isActiveCheckbox = document.getElementById("input-isActive");
+    const shortDescInput = document.getElementById("input-shortDesc");
 
-    if (titleInput && descInput) {
-      uses.push({
-        title: titleInput.value,
-        description: descInput.value,
-      });
+    const name = nameInput?.value.trim() || "";
+    const info = infoInput?.value.trim() || "";
+    const shortDescription = shortDescInput?.value.trim() || "";
+    const roadmapReferences = reference?.value || "";
+    const priority = priorityInput?.value.trim() || "";
+    const isActive = isActiveCheckbox?.checked || false;
+
+    if (!name || !info || !shortDescription || !priority) {
+      alert("Please fill in all required fields.");
+      return;
     }
-  });
-  const basicRoadmap = basicRoadmapInput.value;
-  const roadmaps = roadmapInputs.map((input) => input.value);
-  const info = infoInput.value;
 
-  const shortDescInput = document.getElementById("input-shortDesc");
-  const roadmapReferences = reference ? reference.value : "";
-  const shortDescription = shortDescInput ? shortDescInput.value : "";
-  // Tags Handling
-  const tags = Array.from(document.querySelectorAll(".tag-input")).map(
-    (input) => input.value.trim()
-  );
-  const relatedItemsByCategory = {};
-  const relatedUpdates = {}; // Separate updates for relationships
-
-  document.querySelectorAll(".category-container").forEach((categoryDiv) => {
-    const selectedCategoryId = categoryDiv.dataset.categoryId;
-    const categoryName = window.categoriesData[selectedCategoryId]?.title || "";
-
-    const selectedItems = Array.from(
-      categoryDiv.querySelectorAll(".category-checkbox:checked")
-    );
-
-    var selectedItem = window.items;
-
-    selectedItems.forEach((checkbox) => {
-      const selectedItemId = checkbox.value;
-      if (window.items) {
-        selectedItem = window.items.find(
-          (item) =>
-            item.uid === selectedItemId &&
-            item.categoryUid === selectedCategoryId
-        );
-      }
-
-      const selectedItemName = selectedItem ? selectedItem.name : "";
-
-      if (categoryName && selectedItemName) {
-        if (!relatedItemsByCategory[selectedCategoryId]) {
-          relatedItemsByCategory[selectedCategoryId] = {};
+    // ========== 🔄 Logo ==========
+    let logo = itemData.logo || "";
+    const logoFileInput = document.getElementById("file-logo");
+    if (logoFileInput?.files?.length > 0) {
+      if (logo) {
+        try {
+          await deleteImageFromS3({ key: new URL(logo).pathname.slice(1) });
+        } catch (err) {
+          console.warn("⚠️ Failed to delete old logo:", err.message);
         }
-        relatedItemsByCategory[selectedCategoryId][selectedItemId] =
-          selectedItemName;
+      }
+      logo = await uploadToS3(logoFileInput.files[0], "logo", itemId);
+    }
 
-        // Add relationship updates separately
-        relatedUpdates[
-          `/items/${itemId}/relatedItemsByCategory/${selectedCategoryId}/${selectedItemId}`
-        ] = selectedItemName;
+    // ========== 🔄 Basic Roadmap ==========
+    let basicRoadmap = itemData.basicRoadmap || "";
+    const basicRoadmapFileInput = document.getElementById("file-basicRoadmap");
+    if (basicRoadmapFileInput?.files?.length > 0) {
+      if (basicRoadmap) {
+        try {
+          await deleteImageFromS3({ key: new URL(basicRoadmap).pathname.slice(1) });
+        } catch (err) {
+          console.warn("⚠️ Failed to delete old basic roadmap:", err.message);
+        }
+      }
+      basicRoadmap = await uploadToS3(basicRoadmapFileInput.files[0], "roadmaps/basic", itemId);
+    }
 
-        relatedUpdates[
-          `/items/${selectedItemId}/relatedItemsByCategory/${categoryId}/${itemId}`
-        ] = name;
+    // ========== 🔄 Advanced Roadmaps (roadmap1–4) ==========
+    const roadmaps = [];
+    for (let i = 1; i <= 4; i++) {
+      const input = document.getElementById(`file-roadmap${i}`);
+      let existingUrl = itemData.roadmaps?.[i - 1] || "";
+      if (input?.files?.length > 0) {
+        if (existingUrl) {
+          try {
+            await deleteImageFromS3({ key: new URL(existingUrl).pathname.slice(1) });
+          } catch (err) {
+            console.warn(`⚠️ Failed to delete roadmap ${i}:`, err.message);
+          }
+        }
+        const uploaded = await uploadToS3(input.files[0], "roadmaps/advanced", itemId);
+        roadmaps.push(uploaded);
+      } else if (existingUrl) {
+        roadmaps.push(existingUrl);
+      }
+    }
+
+    // ========== 🔄 All About ==========
+    let allAbout = itemData.allAbout || "";
+    const allAboutInput = document.getElementById("file-allAbout");
+    if (allAboutInput?.files?.length > 0) {
+      if (allAbout) {
+        try {
+          await deleteImageFromS3({ key: new URL(allAbout).pathname.slice(1) });
+        } catch (err) {
+          console.warn("⚠️ Failed to delete old allAbout:", err.message);
+        }
+      }
+      allAbout = await uploadToS3(allAboutInput.files[0], "allabout", itemId);
+    }
+
+    // ========== 🔄 Uses ==========
+    const uses = [];
+    document.querySelectorAll(".field-group").forEach((group) => {
+      const titleInput = group.querySelector('[id^="input-uses-title"]');
+      const descInput = group.querySelector('[id^="input-uses-desc"]');
+      if (titleInput?.value && descInput?.value) {
+        uses.push({ title: titleInput.value, description: descInput.value });
       }
     });
 
-    // Remove unchecked relationships
-    const previouslySelected =
-      window.items.find((item) => item.uid === itemId)
-        ?.relatedItemsByCategory?.[selectedCategoryId] || {};
+    // ========== 🔄 Tags ==========
+    const tags = Array.from(document.querySelectorAll(".tag-input"))
+      .map((input) => input.value.trim())
+      .filter((tag) => tag.length > 0);
 
-    console.log("Previously Selected Related Items:", previouslySelected);
+    // ========== 🔄 Related Items ==========
+    const relatedItemsByCategory = {};
+    const relatedUpdates = {};
 
-    Object.keys(previouslySelected).forEach((relatedItemId) => {
-      if (!selectedItems.some((checkbox) => checkbox.value === relatedItemId)) {
-        relatedUpdates[
-          `/items/${itemId}/relatedItemsByCategory/${selectedCategoryId}/${relatedItemId}`
-        ] = null;
+    document.querySelectorAll(".category-container").forEach((categoryDiv) => {
+      const selectedCategoryId = categoryDiv.dataset.categoryId;
+      const selectedItems = Array.from(
+        categoryDiv.querySelectorAll(".category-checkbox:checked")
+      );
 
-        relatedUpdates[
-          `/items/${relatedItemId}/relatedItemsByCategory/${categoryId}/${itemId}`
-        ] = null;
-      }
-    });
-  });
+      selectedItems.forEach((checkbox) => {
+        const selectedItemId = checkbox.value;
+        const selectedItem = window.items.find(
+          (item) =>
+            item.uid === selectedItemId && item.categoryUid === selectedCategoryId
+        );
+        const selectedItemName = selectedItem?.name || "";
 
-  // Prepare the updated data object
-  const updatedData = {
-    name,
-    logo,
-    shortDescription,
-    roadmapReferences,
-    uses: uses.length > 0 ? uses : [], // Ensure it remains an array
-    basicRoadmap,
-    roadmaps,
-    info,
-    relatedItemsByCategory,
-    priority,
-    isActive,
-    tags: tags.length > 0 ? tags : [],
-    updatedTimestamp: Date.now(),
-  };
+        if (selectedItemName) {
+          if (!relatedItemsByCategory[selectedCategoryId]) {
+            relatedItemsByCategory[selectedCategoryId] = {};
+          }
+          relatedItemsByCategory[selectedCategoryId][selectedItemId] = selectedItemName;
 
-  console.log("Updated Data: ", updatedData);
+          // Forward & reverse references
+          relatedUpdates[
+            `/items/${itemId}/relatedItemsByCategory/${selectedCategoryId}/${selectedItemId}`
+          ] = selectedItemName;
 
-  if (
-    name.length > 0 &&
-    logo.length > 0 &&
-    shortDescription.length > 0 &&
-    info.length > 0 &&
-    priority.length > 0
-  ) {
-    // Update the item in Firebase
-    update(itemRef, updatedData)
-      .then(() => {
-        update(ref(database), relatedUpdates); // Update relationships in all affected categories
-        alert("Item details saved successfully!");
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.error("Error saving item details:", error);
+          relatedUpdates[
+            `/items/${selectedItemId}/relatedItemsByCategory/${categoryId}/${itemId}`
+          ] = name;
+        }
       });
-  } else {
-    alert("Please fill in all required fields.");
+
+      // Remove unchecked items
+      const previouslySelected = itemData.relatedItemsByCategory?.[selectedCategoryId] || {};
+      Object.keys(previouslySelected).forEach((relatedItemId) => {
+        if (!selectedItems.some((cb) => cb.value === relatedItemId)) {
+          relatedUpdates[
+            `/items/${itemId}/relatedItemsByCategory/${selectedCategoryId}/${relatedItemId}`
+          ] = null;
+
+          relatedUpdates[
+            `/items/${relatedItemId}/relatedItemsByCategory/${categoryId}/${itemId}`
+          ] = null;
+        }
+      });
+    });
+
+    // ========== ✅ Final Update ==========
+    const updatedData = {
+      name,
+      logo,
+      shortDescription,
+      roadmapReferences,
+      uses,
+      basicRoadmap,
+      roadmaps,
+      allAbout,
+      info,
+      relatedItemsByCategory,
+      priority,
+      isActive,
+      tags,
+      updatedTimestamp: Date.now(),
+    };
+
+    console.log("✅ Final updatedData:", updatedData);
+
+    await update(itemRef, updatedData);
+    await update(ref(database), relatedUpdates);
+
+    alert("Item updated successfully!");
+    window.location.reload();
+  } catch (error) {
+    console.error("❌ Error saving item:", error);
+    alert("Something went wrong while saving the item.");
+  } finally {
+    loadingOverlay.classList.add("hidden"); // Hide overlay (in finally block)
   }
 }
+
 
 // Helper function to generate field views
 function generateFieldView(label, field, value) {
@@ -696,30 +765,33 @@ function generateFieldView(label, field, value) {
     "roadmap2",
     "roadmap3",
     "roadmap4",
-    "allaboutturl",
+    "allAbout",
   ].includes(field);
 
   const isDescriptionField = ["shortDesc", "info"].includes(field);
 
   return `
-    <div class="field-group">
-      <label for="input-${field}">${label}
+    <div class="field-group" id="field-group-${field}">
+      <label>${label}</label>
       ${
         isUrlField
-          ? `<button class="preview-btn" data-field="${field}">👁️</button>`
-          : ""
+          ? `
+            <input type="file" id="file-${field}" accept="image/*,application/pdf" />
+            <div class="image-preview-container">
+              ${
+                value
+                  ? `<img id="preview-${field}" src="${value}" class="image-preview" alt="${label} preview" />`
+                  : `<img id="preview-${field}" class="image-preview hidden" alt="${label} preview" />`
+              }
+            </div>
+          `
+          : `<input type="text" id="input-${field}" value="${value || ""}" disabled />`
       }
-      ${
-        isDescriptionField
-          ? `<button class="preview-btn" data-field="${field}">👁️</button>`
-          : ""
-      }
-      </label>
-      <input type="text" id="input-${field}" value="${value || ""}" disabled />
-      <button class="edit-btn" data-field="${field}">Edit</button>
+      ${!isUrlField ? `<button class="edit-btn" data-field="${field}">Edit</button>` : ""}
     </div>
   `;
 }
+
 
 // Event listener for preview buttons
 // Event listener for preview buttons
@@ -813,3 +885,22 @@ function sanitizeHTML(html) {
   temp.textContent = html; // Strip HTML tags by rendering as text
   return temp.innerHTML; // Return sanitized content
 }
+
+
+document.addEventListener("change", (event) => {
+  if (event.target && event.target.type === "file") {
+    const input = event.target;
+    const field = input.id.replace("file-", "");
+    const previewImg = document.getElementById(`preview-${field}`);
+
+    const file = input.files[0];
+    if (file && previewImg) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImg.src = e.target.result;
+        previewImg.classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+});

@@ -68,7 +68,9 @@ closeEditModal.addEventListener("click", () => {
 // Handle category form submission
 categoryForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-
+  const loadingOverlay = document.getElementById("loading-overlay");
+  loadingOverlay.classList.remove("hidden"); // Show overlay
+  
 
   const title = document.getElementById("categories-title").value.trim();
   const subtitle = document.getElementById("category-subtitle").value;
@@ -164,6 +166,9 @@ modal.classList.add("hidden");
   } catch (error) {
     console.error("🚨 Error:", error);
     alert("Failed to add category. Try again.");
+  }
+  finally {
+    loadingOverlay.classList.add("hidden"); // Hide overlay (in finally block)
   }
 });
 

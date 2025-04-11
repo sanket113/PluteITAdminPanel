@@ -238,7 +238,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Handle new item submission
 addItemForm.addEventListener("submit", async (e) => {
+  
   e.preventDefault();
+  const loadingOverlay = document.getElementById("loading-overlay");
+  loadingOverlay.classList.remove("hidden"); // Show overlay
 
   const title = document.getElementById("item-title").value;
   const description = document.getElementById("item-description").value;
@@ -394,6 +397,9 @@ const newItemData = {
     addItemModal.classList.add("hidden");
   } catch (error) {
     console.error("Error adding item:", error);
+  }
+  finally {
+    loadingOverlay.classList.add("hidden"); // Hide overlay (in finally block)
   }
 });
 
