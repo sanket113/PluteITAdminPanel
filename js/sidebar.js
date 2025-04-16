@@ -72,7 +72,7 @@ function loadCategories() {
       const categoryId = childSnapshot.key;
       const categoryData = childSnapshot.val();
       const title = categoryData.title;
-      const imageUrl = categoryData.image || "default.jepg";
+      const imageUrl = categoryData.imageUrl || "default.jepg";
 
       if (title) {
         // Create the list item
