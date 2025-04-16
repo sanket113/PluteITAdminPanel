@@ -386,7 +386,8 @@ async function deleteItemById(itemId, itemData, categoryId, deleteImage) {
 // Handle editing a category
 editCategoryForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-
+  const loadingOverlay = document.getElementById("loading-overlay");
+  loadingOverlay.classList.remove("hidden"); // Show overlay
   if (!currentCategoryId) {
     alert("No category selected for editing.");
     return;
@@ -464,6 +465,9 @@ editCategoryForm.addEventListener("submit", async (e) => {
         console.error("🚨 Error updating image:", error);
         alert("Failed to update image.");
         return;
+      }
+      finally {
+        loadingOverlay.classList.add("hidden"); // Hide overlay (in finally block)
       }
     }
 
