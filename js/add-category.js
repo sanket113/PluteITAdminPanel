@@ -269,83 +269,67 @@ onValue(categoriesRef, (snapshot) => {
    
     deleteButton.addEventListener("click", async (event) => {
       event.stopPropagation();
-   
+      const loadingOverlay = document.getElementById("loading-overlay");
+      loadingOverlay.classList.remove("hidden"); // Show overlay
       const confirmDelete = confirm(
         `Are you sure you want to delete the category "${category.title}" and all its related items?`
       );
-   
+    
       if (!confirmDelete) return;
-   
+    
       const categoryRef = ref(database, `categories/${categoryId}`);
       const itemsRef = ref(database, `items`);
-   
+      const functions = getFunctions(app);
+      const deleteImage = httpsCallable(functions, "deleteImageFromS3");
+    
       try {
-        // 🧠 1. Extract S3 key from image URL
-        const imageUrl = category.imageUrl; // stored in Firebase
-        let s3Key = null;
-   
-        if (imageUrl) {
-          const parts = imageUrl.split(".com/");
+        // 🧹 Step 1: Delete category image from S3
+        if (category.imageUrl) {
+          const parts = category.imageUrl.split(".com/");
           if (parts.length > 1) {
-            s3Key = parts[1]; // e.g., "category/uid/filename.jpg"
-            console.log("S3 Key to delete:", s3Key);
-
-
+            const s3Key = parts[1];
+            await deleteImage({ key: s3Key });
+            console.log(`✅ Deleted category image: ${s3Key}`);
           }
         }
-   
-        // 🧠 2. Call Cloud Function (v2 HTTPS onCall) to delete from S3
-        if (s3Key) {
-          const functions = getFunctions(app);
-          const deleteImage = httpsCallable(functions, "deleteImageFromS3");
-          const response = await deleteImage({ key: s3Key });
-          console.log("Cloud Function Response:", response);
-
-
-          if (!response.data.success) {
-            throw new Error("Cloud Function failed to delete the image.");
-          }
-   
-          console.log("Image deleted from S3:", s3Key);
-        }
-   
-        // ✅ 3. Delete the category from Realtime Database
+    
+        // ✅ Step 2: Delete the category from Realtime DB
         await remove(categoryRef);
-   
-        // ✅ 4. Delete all related items under that category
+    
+        // 🔁 Step 3: Loop through all items and delete those with matching categoryUid
         onValue(
           itemsRef,
           async (snapshot) => {
-            if (snapshot.exists()) {
-              const updates = {};
-   
-              snapshot.forEach((childSnapshot) => {
-                const itemId = childSnapshot.key;
-                const itemData = childSnapshot.val();
-   
-                if (itemData.categoryUid === categoryId) {
-                  updates[`items/${itemId}`] = null;
-                }
-   
-                if (itemData.relatedItemsByCategory?.[categoryId]) {
-                  updates[`items/${itemId}/relatedItemsByCategory/${categoryId}`] = null;
-                }
-              });
-   
-              if (Object.keys(updates).length > 0) {
-                await update(ref(database), updates);
+            if (!snapshot.exists()) return;
+    
+            const deletions = [];
+    
+            snapshot.forEach((childSnapshot) => {
+              const itemId = childSnapshot.key;
+              const itemData = childSnapshot.val();
+    
+              if (itemData.categoryUid === categoryId) {
+                deletions.push(deleteItemById(itemId, itemData, categoryId, deleteImage));
+              } else if (itemData.relatedItemsByCategory?.[categoryId]) {
+                // Clean up relatedItemsByCategory even if item is from another category
+                deletions.push(remove(ref(database, `items/${itemId}/relatedItemsByCategory/${categoryId}`)));
               }
-            }
+            });
+    
+            await Promise.all(deletions);
+            alert(`Category "${category.title}" and all related items/images have been deleted successfully.`);
           },
           { onlyOnce: true }
         );
-   
-        alert(`Category "${category.title}" and all related items deleted successfully.`);
       } catch (error) {
-        console.error("Error deleting category:", error);
-        alert("Failed to delete category. Please try again.");
+        console.error("❌ Error deleting category and items:", error);
+        alert("Something went wrong while deleting the category.");
+      }
+      finally {
+        loadingOverlay.classList.add("hidden"); // Hide overlay (in finally block)
       }
     });
+    
    
     // Append buttons to button container
     // buttonContainer.appendChild(viewButton);
@@ -366,6 +350,37 @@ onValue(categoriesRef, (snapshot) => {
   });
 });
 
+
+async function deleteItemById(itemId, itemData, categoryId, deleteImage) {
+  const imageUrls = [];
+
+  if (itemData.logo) imageUrls.push(itemData.logo);
+  if (itemData.basicRoadmap) imageUrls.push(itemData.basicRoadmap);
+  if (itemData.allAbout) imageUrls.push(itemData.allAbout);
+  if (Array.isArray(itemData.roadmaps)) {
+    imageUrls.push(...itemData.roadmaps);
+  }
+
+  for (const url of imageUrls) {
+    try {
+      const urlObj = new URL(url);
+      const fileKey = decodeURIComponent(urlObj.pathname.slice(1));
+      await deleteImage({ key: fileKey });
+      console.log(`✅ Deleted item image: ${fileKey}`);
+    } catch (err) {
+      console.warn(`⚠️ Failed to delete ${url}: ${err.message}`);
+    }
+  }
+
+  // Clean up relatedItemsByCategory (if exists)
+  if (itemData.relatedItemsByCategory?.[categoryId]) {
+    await remove(ref(database, `items/${itemId}/relatedItemsByCategory/${categoryId}`));
+  }
+
+  // Delete the item from DB
+  await remove(ref(database, `items/${itemId}`));
+  console.log(`🗑️ Deleted item ${itemId}`);
+}
 
 // Handle editing a category
 // Handle editing a category
